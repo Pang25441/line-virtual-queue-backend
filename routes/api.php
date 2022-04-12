@@ -21,10 +21,7 @@ use Illuminate\Support\Str;
 */
 
 // Public Route
-
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
-
-    // Route::get('/profile', 'profile');
     Route::post('/login', 'login');
     Route::get('/logout', 'logout');
 });
@@ -33,5 +30,5 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
 // Private Route
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::get('/profile', [ AuthController::class, 'profile']);
+    Route::get('/profile', [AuthController::class, 'profile']);
 });
