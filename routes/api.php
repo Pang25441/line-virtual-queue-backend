@@ -1,7 +1,13 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +20,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Public Route
+
+Route::prefix('auth')->controller(AuthController::class)->group(function () {
+
+    // Route::get('/profile', 'profile');
+    Route::post('/login', 'login');
+    Route::get('/logout', 'logout');
+});
+
+
+// Private Route
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/profile', [ AuthController::class, 'profile']);
 });
