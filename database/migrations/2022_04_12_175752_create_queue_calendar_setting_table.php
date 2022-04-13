@@ -17,7 +17,12 @@ class CreateQueueCalendarSettingTable extends Migration
             $table->id();
             $table->foreignId('queue_setting_id')->constrained('queue_setting')->cascadeOnUpdate()->cascadeOnDelete()->comment("Queue Setting ID");
             $table->date('calendar_date')->comment("Queue month");
-            $table->json("day_off")->comment("Unavailable Date of month");
+            $table->time('business_time_open')->comment('Business Hour Open');
+            $table->time('business_time_close')->comment('Business Hour Close');
+            $table->json("day_off")->default('[]')->comment("Unavailable Date of month");
+            $table->time('allocate_time')->default('01:00:00')->comment('Allocate time per queue');
+            $table->unsignedtinyInteger('queue_on_allocate')->comment('Number of queue in one allocate time');
+            $table->unsignedTinyInteger('status')->default(0)->comment('0=Draft, 1=active');
             $table->timestamps();
         });
     }
@@ -29,6 +34,9 @@ class CreateQueueCalendarSettingTable extends Migration
      */
     public function down()
     {
+        Schema::table('queue_calendar_setting', function(Blueprint $table){
+            $table->dropForeign(['queue_setting_id']);
+        });
         Schema::dropIfExists('queue_calendar_setting');
     }
 }

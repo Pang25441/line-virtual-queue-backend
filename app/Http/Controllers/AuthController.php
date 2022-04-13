@@ -12,11 +12,11 @@ class AuthController extends Controller
     function login(Request $request)
     {
         if (!Auth::attempt($request->only(['email', 'password']))) {
-            $err = ValidationException::withMessages([
-                'message' => ['The provided credentials are incorrect.'],
-            ]);
+            // $err = ValidationException::withMessages([
+            //     'message' => ['The provided credentials are incorrect.'],
+            // ]);
 
-            return $this->sendBadResponse($err, 'Login Failed');
+            return $this->sendBadResponse(null, 'The provided credentials are incorrect.');
         }
 
         $request->session()->regenerate();

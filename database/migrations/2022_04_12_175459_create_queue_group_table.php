@@ -31,6 +31,9 @@ class CreateQueueGroupTable extends Migration
      */
     public function down()
     {
+        Schema::table('queue_group', function(Blueprint $table){
+            $table->dropForeign(['queue_setting_id']);
+        });
         Schema::dropIfExists('queue_group');
     }
 }
