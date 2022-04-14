@@ -31,7 +31,7 @@ class CreateQueueSettingTable extends Migration
      */
     public function down()
     {
-        Schema::table('queue_setting', function(Blueprint $table){
+        Schema::table('queue_setting', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
         });
         Schema::dropIfExists('queue_setting');

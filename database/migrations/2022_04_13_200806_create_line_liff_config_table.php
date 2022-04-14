@@ -15,6 +15,9 @@ class CreateLineLiffConfigTable extends Migration
     {
         Schema::create('line_liff_config', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('line_config_id')->constrained('line_config')->cascadeOnUpdate()->cascadeOnDelete()->comment("Line Confnig ID");
+            $table->string('ticket_app', 50)->nullable()->comment('LIFF ID - Ticket App');
+            $table->string('booking_app', 50)->nullable()->comment('LIFF ID - Booking App');
             $table->timestamps();
         });
     }
@@ -26,6 +29,9 @@ class CreateLineLiffConfigTable extends Migration
      */
     public function down()
     {
+        Schema::table('line_liff_config', function (Blueprint $table) {
+            $table->dropForeign(['line_config_id']);
+        });
         Schema::dropIfExists('line_liff_config');
     }
 }

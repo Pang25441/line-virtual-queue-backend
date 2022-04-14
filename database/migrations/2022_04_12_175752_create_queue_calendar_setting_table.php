@@ -22,7 +22,7 @@ class CreateQueueCalendarSettingTable extends Migration
             $table->json("day_off")->default('[]')->comment("Unavailable Date of month");
             $table->time('allocate_time')->default('01:00:00')->comment('Allocate time per queue');
             $table->unsignedtinyInteger('queue_on_allocate')->comment('Number of queue in one allocate time');
-            $table->unsignedTinyInteger('status')->default(0)->comment('0=Draft, 1=active');
+            $table->unsignedTinyInteger('active')->default(0)->comment('0=Draft, 1=active');
             $table->timestamps();
         });
     }
@@ -34,7 +34,7 @@ class CreateQueueCalendarSettingTable extends Migration
      */
     public function down()
     {
-        Schema::table('queue_calendar_setting', function(Blueprint $table){
+        Schema::table('queue_calendar_setting', function (Blueprint $table) {
             $table->dropForeign(['queue_setting_id']);
         });
         Schema::dropIfExists('queue_calendar_setting');

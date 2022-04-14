@@ -30,7 +30,7 @@ class CreateLineMemberTable extends Migration
      */
     public function down()
     {
-        Schema::table('line_member', function(Blueprint $table){
+        Schema::table('line_member', function (Blueprint $table) {
             $table->dropForeign(['line_config_id']);
         });
 
