@@ -19,7 +19,8 @@ class CreateLineMemberTable extends Migration
             $table->string('user_id', 255)->comment('Line Profile ID');
             $table->string('display_name', 100)->comment('Line Profile Name');
             $table->string('picture', 255)->comment('Line Profile Picture');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
     }
 

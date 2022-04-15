@@ -21,7 +21,8 @@ class CreateQueueGroupTable extends Migration
             $table->unsignedInteger("active_count")->comment("Running Number");
             $table->tinyText("queue_group_name")->comment("Queue Group Prefix");
             $table->string("description", 100)->comment("Description");
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
     }
 

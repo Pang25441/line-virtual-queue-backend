@@ -20,7 +20,8 @@ class CreateLineConfigTable extends Migration
             $table->string('channel_access_token', 255)->comment('Line Messaging API Chennel Access Token');
             $table->string('login_channel_id', 50)->comment('Line Login Channel ID');
             $table->string('login_channel_access_token', 255)->comment('Line login Channel Access Token');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
     }
 

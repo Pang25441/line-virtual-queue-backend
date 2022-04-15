@@ -20,7 +20,8 @@ class CreateQueueSettingTable extends Migration
             $table->string("detail")->comment("Queue Detail");
             // $table->string("line_access_token")->comment("Line Access Token");
 
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
     }
 

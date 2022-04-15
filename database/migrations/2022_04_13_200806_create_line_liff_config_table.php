@@ -19,7 +19,8 @@ class CreateLineLiffConfigTable extends Migration
             $table->string('ticket_app', 50)->nullable()->comment('LIFF ID - Ticket App');
             $table->string('booking_app', 50)->nullable()->comment('LIFF ID - Booking App');
             $table->string('remark', 255)->default('')->comment('Remark');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
     }
 

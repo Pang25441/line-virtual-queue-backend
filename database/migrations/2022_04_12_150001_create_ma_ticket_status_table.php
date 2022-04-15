@@ -15,10 +15,11 @@ class CreateMaTicketStatusTable extends Migration
     {
         Schema::create('ma_ticket_status', function (Blueprint $table) {
             $table->id();
+            $table->string('code', 100)->comment('Code');
             $table->string('name', 100)->comment('Parameter Name');
-            $table->string('value', 100)->comment('Value');
             $table->string('description', 255)->comment('Description');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
     }
 
