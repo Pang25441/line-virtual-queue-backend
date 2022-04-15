@@ -15,6 +15,9 @@ class CreateMaBookingStatusTable extends Migration
     {
         Schema::create('ma_booking_status', function (Blueprint $table) {
             $table->id();
+            $table->string('name', 100)->comment('Parameter Name');
+            $table->string('value', 100)->comment('Value');
+            $table->string('description', 255)->comment('Description');
             $table->timestamps();
         });
     }

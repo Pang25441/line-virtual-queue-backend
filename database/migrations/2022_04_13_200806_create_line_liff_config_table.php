@@ -18,6 +18,7 @@ class CreateLineLiffConfigTable extends Migration
             $table->foreignId('line_config_id')->constrained('line_config')->cascadeOnUpdate()->cascadeOnDelete()->comment("Line Confnig ID");
             $table->string('ticket_app', 50)->nullable()->comment('LIFF ID - Ticket App');
             $table->string('booking_app', 50)->nullable()->comment('LIFF ID - Booking App');
+            $table->string('remark', 255)->default('')->comment('Remark');
             $table->timestamps();
         });
     }

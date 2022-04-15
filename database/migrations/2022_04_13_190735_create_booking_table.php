@@ -18,6 +18,7 @@ class CreateBookingTable extends Migration
             $table->foreignId('queue_setting_id')->constrained('queue_setting')->cascadeOnUpdate()->cascadeOnDelete()->comment("Queue Setting ID");
             $table->foreignId('queue_calendar_setting_id')->constrained('queue_calendar_setting')->cascadeOnUpdate()->cascadeOnDelete()->comment("Queue Calendar Setting ID");
             $table->foreignId('line_member_id')->constrained('line_member')->cascadeOnUpdate()->cascadeOnDelete()->comment("Line Member ID");
+            $table->foreignId('status')->constrained('ma_booking_status')->restrictOnUpdate()->restrictOnDelete()->comment('ma_booking_status ID - Pending, Approve, Reject, Revise, Cancel by Customer');
             $table->string('customer_name', 150)->comment('Customer Name');
             $table->string('customer_contact', 100)->comment('Contact');
             $table->dateTime('booking_date')->comment('Booking date/time');
@@ -28,7 +29,6 @@ class CreateBookingTable extends Migration
             $table->dateTime('revise_date')->comment('Booking Revise date time');
             $table->foreignId('revise_by')->constrained('users')->cascadeOnUpdate()->cascadeOnDelete()->comment("Revise by User ID");
             $table->dateTime('cancel_date')->comment('Customer Cancel Datetime');
-            $table->unsignedTinyInteger('status')->default(0)->comment('Pending, Approve, Reject, Revise, Cancel by Customer');
             $table->timestamps();
         });
     }
@@ -44,6 +44,7 @@ class CreateBookingTable extends Migration
             $table->dropForeign(['queue_setting_id']);
             $table->dropForeign(['queue_calendar_setting_id']);
             $table->dropForeign(['line_member_id']);
+            $table->dropForeign(['status']);
         });
         Schema::dropIfExists('booking');
     }
