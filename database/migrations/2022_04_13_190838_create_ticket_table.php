@@ -19,11 +19,12 @@ class CreateTicketTable extends Migration
             $table->foreignId('line_member_id')->constrained('line_member')->cascadeOnUpdate()->cascadeOnDelete()->comment("Line Member ID");
             $table->foreignId('status')->constrained('ma_ticket_status')->restrictOnDelete()->restrictOnDelete()->comment('ma_ticket_status ID');
             $table->unsignedInteger('queue_group_active_count')->comment('Queue Group Active Count');
-            $table->dateTime('queue_time')->useCurrent()->comment('Ticket print date time');
-            $table->dateTime('call_time')->nullable()->comment('Queue Call time');
-            $table->dateTime('execute_time')->nullable()->comment('Queue Start Process');
+            $table->dateTime('pending_time')->useCurrent()->comment('Ticket print date time');
+            $table->dateTime('calling_time')->nullable()->comment('Queue Calling time');
+            $table->dateTime('executed_time')->nullable()->comment('Queue Start Process');
             $table->dateTime('postpone_time')->nullable()->comment('Queue postpone time');
             $table->dateTime('reject_time')->nullable()->comment('Queue rejected time');
+            $table->dateTime('lost_time')->nullable()->comment('Queue Lost time');
             $table->unsignedTinyInteger('is_postpone')->default(0)->comment('Is queue was postpone');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

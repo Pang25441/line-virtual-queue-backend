@@ -21,7 +21,7 @@ class CreateQueueCalendarSettingTable extends Migration
             $table->time('business_time_close')->comment('Business Hour Close');
             $table->json("day_off")->default('[]')->comment("Unavailable Date of month");
             $table->time('allocate_time')->default('01:00:00')->comment('Allocate time per queue');
-            $table->unsignedtinyInteger('queue_on_allocate')->comment('Number of queue in one allocate time');
+            $table->unsignedtinyInteger('queue_on_allocate')->default(1)->comment('Number of queue in one allocate time');
             $table->unsignedTinyInteger('active')->default(0)->comment('0=Draft, 1=active');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

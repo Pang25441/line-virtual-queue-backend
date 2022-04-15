@@ -19,7 +19,7 @@ class CreateQueueGroupTable extends Migration
             $table->string('unique_key')->nullable()->comment('Random unique key');
             $table->unsignedTinyInteger('active')->default(0)->comment("Active Status");
             $table->unsignedInteger("active_count")->comment("Running Number");
-            $table->tinyText("queue_group_name")->comment("Queue Group Prefix");
+            $table->tinyText("queue_group_name")->nullable()->comment("Queue Group Prefix");
             $table->string("description", 100)->comment("Description");
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
