@@ -15,10 +15,10 @@ class CreateTicketTable extends Migration
     {
         Schema::create('ticket', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('queue_group_id')->constrained('queue_group')->cascadeOnUpdate()->cascadeOnDelete()->comment("Queue Setting ID");
+            $table->foreignId('ticket_group_id')->constrained('ticket_group')->cascadeOnUpdate()->cascadeOnDelete()->comment("Queue Ticket Group ID");
             $table->foreignId('line_member_id')->constrained('line_member')->cascadeOnUpdate()->cascadeOnDelete()->comment("Line Member ID");
             $table->foreignId('status')->constrained('ma_ticket_status')->restrictOnDelete()->restrictOnDelete()->comment('ma_ticket_status ID');
-            $table->unsignedInteger('queue_group_active_count')->comment('Queue Group Active Count');
+            $table->unsignedInteger('ticket_group_active_count')->comment('Queue Ticket Group Active Count');
             $table->dateTime('pending_time')->useCurrent()->comment('Ticket print date time');
             $table->dateTime('calling_time')->nullable()->comment('Queue Calling time');
             $table->dateTime('executed_time')->nullable()->comment('Queue Start Process');
@@ -39,7 +39,7 @@ class CreateTicketTable extends Migration
     public function down()
     {
         Schema::table('ticket', function (Blueprint $table) {
-            $table->dropForeign(['queue_group_id']);
+            $table->dropForeign(['ticket_group_id']);
             $table->dropForeign(['line_member_id']);
             $table->dropForeign(['status']);
         });

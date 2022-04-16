@@ -18,8 +18,7 @@ class LineConfigSeeder extends Seeder
             'line_id' => env('LINE_ID'),
             'channel_id' => env('LINE_CHANNEL_ID'),
             'channel_access_token' => env('LINE_ACCESS_TOKEN'),
-            'login_channel_id' => env('LINE_LOGIN_CHANNEL_ID'),
-            'login_channel_access_token' => env('LINE_LOGIN_ACCESS_TOKEN')
+            'login_channel_id' => env('LINE_LOGIN_CHANNEL_ID')
         ]);
 
         DB::table('line_liff_config')->insert([

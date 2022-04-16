@@ -13,13 +13,13 @@ class CreateQueueGroupTable extends Migration
      */
     public function up()
     {
-        Schema::create('queue_group', function (Blueprint $table) {
+        Schema::create('ticket_group', function (Blueprint $table) {
             $table->id();
             $table->foreignId('queue_setting_id')->constrained('queue_setting')->cascadeOnUpdate()->cascadeOnDelete()->comment("Queue Setting ID");
             $table->string('unique_key')->nullable()->comment('Random unique key');
             $table->unsignedTinyInteger('active')->default(0)->comment("Active Status");
             $table->unsignedInteger("active_count")->comment("Running Number");
-            $table->tinyText("queue_group_name")->nullable()->comment("Queue Group Prefix");
+            $table->tinyText("ticket_group_prefix")->nullable()->comment("Queue Group Prefix");
             $table->string("description", 100)->comment("Description");
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
@@ -33,9 +33,9 @@ class CreateQueueGroupTable extends Migration
      */
     public function down()
     {
-        Schema::table('queue_group', function (Blueprint $table) {
+        Schema::table('ticket_group', function (Blueprint $table) {
             $table->dropForeign(['queue_setting_id']);
         });
-        Schema::dropIfExists('queue_group');
+        Schema::dropIfExists('ticket_group');
     }
 }

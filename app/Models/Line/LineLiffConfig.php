@@ -11,4 +11,8 @@ class LineLiffConfig extends Model
 
     protected $table = "line_liff_config";
 
+    function line_config()
+    {
+        return $this->belongsTo(LineConfig::class, 'line_config_id');
+    }
 }

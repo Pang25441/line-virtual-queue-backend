@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Master;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class QueueGroup extends Model
+class MaTicketStatus extends Model
 {
     use HasFactory;
 
-    protected $table = "queue_group";
-
+    protected $table = "ma_ticket_status";
 }

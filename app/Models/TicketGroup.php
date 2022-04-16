@@ -5,19 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class QueueCalendarSetting extends Model
+class TicketGroup extends Model
 {
     use HasFactory;
 
-    protected $table = "queue_calendar_setting";
-
-    protected $casts = [
-        'day_off' => 'array',
-    ];
+    protected $table = "ticket_group";
 
     function queue_setting()
     {
         return $this->belongsTo(QueueSetting::class, 'queue_setting_id');
     }
-
 }

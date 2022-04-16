@@ -11,4 +11,10 @@ class LineConfig extends Model
 
     protected $table = "line_config";
 
+    protected $with = ['line_liff_config'];
+
+    function line_liff_config()
+    {
+        return $this->hasOne(LineLiffConfig::class, 'line_config_id');
+    }
 }
