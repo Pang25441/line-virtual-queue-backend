@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Line\LineConfigController;
+use App\Http\Controllers\Settings\QueueCalendarSettingController;
 use App\Http\Controllers\Settings\QueueSettingController;
+use App\Http\Controllers\Settings\TicketGroupController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -32,20 +34,26 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/profile', [AuthController::class, 'profile']);
 
-    Route::prefix('setting')->controller(QueueSettingController::class)->group(function () {
-        Route::get('queue', 'show');
-        Route::post('queue', 'store');
-        Route::put('queue', 'update');
+    Route::prefix('setting')->group(function () {
+        Route::controller(QueueSettingController::class)->group(function () {
+            Route::get('queue', 'show');
+            Route::post('queue', 'store');
+            Route::put('queue', 'update');
+        });
 
-        Route::get('calendar', 'index');
-        Route::get('calendar/{id}', 'show');
-        Route::post('calendar', 'store');
-        Route::put('calendar', 'update');
+        Route::controller(QueueCalendarSettingController::class)->group(function () {
+            Route::get('calendar', 'index');
+            Route::get('calendar/{id}', 'show');
+            Route::post('calendar', 'store');
+            Route::put('calendar', 'update');
+        });
 
-        Route::get('ticket', 'index');
-        Route::get('ticket/{id}', 'show');
-        Route::post('ticket', 'store');
-        Route::put('ticket', 'update');
-        Route::put('delete', 'destroy');
+        Route::controller(TicketGroupController::class)->group(function () {
+            Route::get('ticket', 'index');
+            Route::get('ticket/{id}', 'show');
+            Route::post('ticket', 'store');
+            Route::put('ticket', 'update');
+            Route::put('delete', 'destroy');
+        });
     });
 });
