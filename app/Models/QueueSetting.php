@@ -2,6 +2,31 @@
 
 namespace App\Models;
 
+/**
+ * App\Models\QueueSetting
+ *
+ * @property int $id
+ * @property string $display_name
+ * @property string $detail
+ * @property int $user_id
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\QueueCalendarSetting[] $queue_calendar_setting
+ * @property-read int|null $queue_calendar_setting_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TicketGroup[] $ticket_group
+ * @property-read int|null $ticket_group_count
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting query()
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting whereDetail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting whereDisplayName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting whereUserId($value)
+ * @mixin \Eloquent
+ */
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

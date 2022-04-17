@@ -23,9 +23,8 @@ class LineConfigSeeder extends Seeder
 
         DB::table('line_liff_config')->insert([
             'line_config_id' => $line_config_id,
-            'ticket_app' => env('LIFF_TICKET_APP'),
-            'booking_app' => env('LIFF_BOOKING_APP'),
-            'remark' => '',
+            'ticket_liff_app_id' => env('LIFF_TICKET_APP'),
+            'booking_liff_app_id' => env('LIFF_BOOKING_APP'),
         ]);
     }
 }

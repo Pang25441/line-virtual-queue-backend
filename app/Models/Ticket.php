@@ -6,6 +6,44 @@ use App\Models\Master\MaTicketStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\Ticket
+ *
+ * @property int $id
+ * @property int $ticket_group_id
+ * @property int $line_member_id
+ * @property int $status
+ * @property int $ticket_group_active_count Queue Ticket Group Active Count
+ * @property string $pending_time Ticket print date time
+ * @property string|null $calling_time Queue Calling time
+ * @property string|null $executed_time Queue Start Process
+ * @property string|null $postpone_time Queue postpone time
+ * @property string|null $reject_time Queue rejected time
+ * @property string|null $lost_time Queue Lost time
+ * @property int $is_postpone Is queue was postpone
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ * @property-read \App\Models\TicketGroup $ticket_group
+ * @property-read MaTicketStatus|null $ticket_status
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereCallingTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereExecutedTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereIsPostpone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereLineMemberId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereLostTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket wherePendingTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket wherePostponeTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereRejectTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereTicketGroupActiveCount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereTicketGroupId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Ticket extends Model
 {
     use HasFactory;
