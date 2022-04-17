@@ -2,13 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Line\LineConfigController;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Settings\QueueSettingController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Str;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,7 +24,6 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
 
 Route::apiResource('line_config', LineConfigController::class);
 Route::prefix('line_config')->controller(LineConfigController::class)->group(function () {
-
 });
 
 
@@ -37,4 +31,21 @@ Route::prefix('line_config')->controller(LineConfigController::class)->group(fun
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/profile', [AuthController::class, 'profile']);
+
+    Route::prefix('setting')->controller(QueueSettingController::class)->group(function () {
+        Route::get('queue', 'show');
+        Route::post('queue', 'store');
+        Route::put('queue', 'update');
+
+        Route::get('calendar', 'index');
+        Route::get('calendar/{id}', 'show');
+        Route::post('calendar', 'store');
+        Route::put('calendar', 'update');
+
+        Route::get('ticket', 'index');
+        Route::get('ticket/{id}', 'show');
+        Route::post('ticket', 'store');
+        Route::put('ticket', 'update');
+        Route::put('delete', 'destroy');
+    });
 });
