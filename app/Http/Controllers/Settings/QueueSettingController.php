@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\QueueSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class QueueSettingController extends Controller
@@ -29,58 +30,11 @@ class QueueSettingController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'displayName' => 'required|max:255',
+            'display_name' => 'required|max:255',
             'detail' => 'required|max:255'
         ]);
 
-        $user = $request->user;
-
-        if ($validator->fails()) {
-            return $this->sendBadResponse($validator->errors(), 'Validation Failed');
-        }
-
-        try {
-            $queueSetting = new QueueSetting();
-            $queueSetting->user_id = $user->id;
-            $queueSetting->display_name = $request->input('displayName');
-            $queueSetting->detail = $request->input('detail');
-            $queueSetting->save();
-
-            return $this->sendOkResponse($queueSetting, 'Save successful');
-        } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'Server Error');
-        }
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Request $request)
-    {
-        $user = $request->user;
-
-        $queueSetting = QueueSetting::where('user_id', $user->id)->first();
-
-        return $this->sendOkResponse($queueSetting);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'displayName' => 'required|max:255',
-            'detail' => 'required|max:255'
-        ]);
-
-        $user = $request->user;
+        $user = Auth::user();
 
         if ($validator->fails()) {
             return $this->sendBadResponse($validator->errors(), 'Validation Failed');
@@ -88,7 +42,7 @@ class QueueSettingController extends Controller
 
         $queueSetting = QueueSetting::where('user_id', $user->id)->first();
 
-        if(!$queueSetting) {
+        if (!$queueSetting) {
             $queueSetting = new QueueSetting();
         }
 
@@ -103,6 +57,36 @@ class QueueSettingController extends Controller
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'Server Error');
         }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Request $request)
+    {
+        $user = Auth::user();
+
+        try {
+            $queueSetting = QueueSetting::where('user_id', $user->id)->first();
+            return $this->sendOkResponse($queueSetting, $queueSetting ? 'Setting found' : 'Setting not found');
+        } catch (\Throwable $th) {
+            //throw $th;
+            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request)
+    {
+        return $this->store($request);
     }
 
     /**
