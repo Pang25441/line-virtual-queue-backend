@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('calendar/{id}', 'show');
             Route::post('calendar', 'store');
             Route::put('calendar', 'update');
+            Route::put('calendarActivate', 'calendarActivate');
         });
 
         Route::controller(TicketGroupController::class)->group(function () {
