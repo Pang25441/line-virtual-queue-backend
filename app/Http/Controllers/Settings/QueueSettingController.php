@@ -40,16 +40,15 @@ class QueueSettingController extends Controller
             return $this->sendBadResponse($validator->errors(), 'Validation Failed');
         }
 
-        $queueSetting = QueueSetting::where('user_id', $user->id)->first();
+        $queueSetting = QueueSetting::whereUserId($user->id)->first();
 
         if (!$queueSetting) {
             $queueSetting = new QueueSetting();
         }
 
         try {
-            $queueSetting = new QueueSetting();
             $queueSetting->user_id = $user->id;
-            $queueSetting->display_name = $request->input('displayName');
+            $queueSetting->display_name = $request->input('display_name');
             $queueSetting->detail = $request->input('detail');
             $queueSetting->save();
 

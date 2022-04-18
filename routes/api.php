@@ -45,8 +45,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('calendar', 'index');
             Route::get('calendar/{id}', 'show');
             Route::post('calendar', 'store');
-            Route::put('calendar', 'update');
-            Route::put('calendarActivate', 'calendarActivate');
+            Route::put('calendar/{id}', 'update');
+            Route::get('calendarActivate/{id}', 'calendarActivate');
         });
 
         Route::controller(TicketGroupController::class)->group(function () {

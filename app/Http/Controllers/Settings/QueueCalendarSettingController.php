@@ -7,7 +7,7 @@ use App\Models\QueueCalendarSetting;
 use App\Models\QueueSetting;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -26,13 +26,17 @@ class QueueCalendarSettingController extends Controller
 
         try {
             $now = Carbon::now();
-            $year = $request->input('year', $now->year);
-            $queueSetting = QueueSetting::whereUserId($user->id)->with('queue_calendar_setting', function (Builder $query) use ($year) {
+            $year = $request->query('year', $now->year);
+            $queueSetting = QueueSetting::whereUserId($user->id)->with(['queue_calendar_setting' => function ($query) use ($year) {
                 $query->whereYear('calendar_date', '=', $year);
                 $query->orderBy('calendar_date', 'asc');
-            })->first();
+            }])->first();
 
-            $queueCalendarSetting = $queueSetting->queue_calendar_setting();
+            if (!$queueSetting) {
+                return $this->sendBadResponse(null, 'Queue Setting Not Found');
+            }
+
+            $queueCalendarSetting = $queueSetting->queue_calendar_setting;
             return $this->sendOkResponse($queueCalendarSetting, 'Calendar Found');
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'DB Error');
@@ -47,12 +51,20 @@ class QueueCalendarSettingController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+        $queueSetting = QueueSetting::whereUserId($user->id)->first();
+
+        if (!$queueSetting) {
+            return $this->sendBadResponse(null, 'Queue Setting not found');
+        }
+
         $validator = Validator::make($request->all(), [
             'year' => ['required', 'numeric'],
             'month' => ['required', 'numeric', 'min:1', 'max:12'],
             'business_time_open' => ['required'],
             'business_time_close' => ['required'],
-            'day_off' => ['required', 'array'],
+            'day_off' => ['array'],
             // 'allocate_time' => ['required'],
             // 'queue_on_allocate' => ['required'],
             // 'active' => [],
@@ -62,7 +74,6 @@ class QueueCalendarSettingController extends Controller
             return $this->sendBadResponse($validator->errors(), 'Validation Failed');
         }
 
-        $user = Auth::user();
         $now = Carbon::now();
 
         $_year = $request->input('year', 0);
@@ -91,7 +102,7 @@ class QueueCalendarSettingController extends Controller
             }
 
             // Calendar Date is newer more than one month from NOW
-            if ($calendar->diffInMonths($now) > 1) {
+            if ($calendar->diffInMonths($now) >= 1) {
                 throw new Exception("Calendar Date is newer more than one month from NOW");
             }
         } catch (\Throwable $th) {
@@ -99,6 +110,7 @@ class QueueCalendarSettingController extends Controller
         }
 
         $queueCalendarSetting = new QueueCalendarSetting();
+        $queueCalendarSetting->queue_setting_id = $queueSetting->id;
         $queueCalendarSetting->calendar_date = $calendar->toDateString();
         $queueCalendarSetting->business_time_open = $request->input('business_time_open', '09:00:00');
         $queueCalendarSetting->business_time_close = $request->input('business_time_close', '18:00:00');
@@ -108,7 +120,7 @@ class QueueCalendarSettingController extends Controller
 
         try {
             $result = $queueCalendarSetting->save();
-            return $this->sendOkResponse($result, 'Save Calendar Success');
+            return $this->sendOkResponse($queueCalendarSetting, 'Save Calendar Success');
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'DB Error');
         }
@@ -156,7 +168,7 @@ class QueueCalendarSettingController extends Controller
         $validator = Validator::make($request->all(), [
             'business_time_open' => ['required'],
             'business_time_close' => ['required'],
-            'day_off' => ['required', 'array'],
+            'day_off' => ['array'],
             'allocate_time' => ['required'],
             'queue_on_allocate' => ['required'],
         ]);
@@ -175,14 +187,13 @@ class QueueCalendarSettingController extends Controller
             }
 
             // Calendar Date is newer more than one month from NOW
-            if ($calendar->diffInMonths($now) > 1) {
+            if ($calendar->diffInMonths($now) >= 1) {
                 throw new Exception("Calendar Date is newer more than one month from NOW");
             }
         } catch (\Throwable $th) {
             return $this->sendBadResponse($th->getMessage(), $th->getMessage());
         }
 
-        $queueCalendarSetting = new QueueCalendarSetting();
         $queueCalendarSetting->business_time_open = $request->input('business_time_open', $queueCalendarSetting->business_time_open);
         $queueCalendarSetting->business_time_close = $request->input('business_time_close', $queueCalendarSetting->business_time_close);
         $queueCalendarSetting->day_off = $request->input('day_off', $queueCalendarSetting->day_off);
@@ -191,7 +202,7 @@ class QueueCalendarSettingController extends Controller
 
         try {
             $result = $queueCalendarSetting->save();
-            return $this->sendOkResponse($result, 'Update Calendar Success');
+            return $this->sendOkResponse($queueCalendarSetting, 'Update Calendar Success');
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'DB Error');
         }
