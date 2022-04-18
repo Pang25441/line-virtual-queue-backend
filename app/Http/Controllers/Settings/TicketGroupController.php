@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\TicketGroup;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TicketGroupController extends Controller
 {
@@ -14,7 +17,17 @@ class TicketGroupController extends Controller
      */
     public function index()
     {
-        //
+        $user = Auth::user();
+
+        try {
+            $ticketGroup = TicketGroup::whereHas('queue_stting', function (Builder $query) use ($user) {
+                $query->whereUserId($user->id);
+            })->orderBy('ticket_group_prefix', 'ASC')->get();
+        } catch (\Throwable $th) {
+            $this->sendErrorResponse($th->getMessage(), 'DB Error');
+        }
+
+        $this->sendOkResponse($ticketGroup);
     }
 
     /**
