@@ -81,7 +81,7 @@ class QueueCalendarSettingController extends Controller
         })->first();
 
         if ($queueCalendarSetting) {
-            return $this->update($request);
+            return $this->update($request, $queueCalendarSetting->id);
         }
 
         try {
@@ -141,9 +141,8 @@ class QueueCalendarSettingController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
-        $id = $request->input('id', null);
         $user = Auth::user();
 
         $queueCalendarSetting = QueueCalendarSetting::whereId($id)->whereHas('queue_setting', function (Builder $query) use ($user) {
@@ -196,6 +195,33 @@ class QueueCalendarSettingController extends Controller
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'DB Error');
         }
+    }
+
+    public function calendarActivate(Request $request, $id)
+    {
+
+        $user = Auth::user();
+
+        try {
+            $queueCalendarSetting = QueueCalendarSetting::whereId($id)->whereHas('queue_setting', function (Builder $query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->first();
+        } catch (\Throwable $th) {
+            return $this->sendErrorResponse(null, 'DB Error');
+        }
+
+        if (!$queueCalendarSetting) {
+            return $this->sendBadResponse(null, 'Calendar Not found');
+        }
+
+        $queueCalendarSetting->active = 1;
+        $result = $queueCalendarSetting->save();
+
+        if ($result) {
+            return $this->sendOkResponse(true, 'Calendar is activated');
+        }
+
+        return $this->sendBadResponse(null, 'Calendar activate fail');
     }
 
     /**
