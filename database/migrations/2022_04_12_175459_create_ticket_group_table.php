@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateQueueGroupTable extends Migration
+class CreateTicketGroupTable extends Migration
 {
     /**
      * Run the migrations.
@@ -18,8 +18,8 @@ class CreateQueueGroupTable extends Migration
             $table->foreignId('queue_setting_id')->constrained('queue_setting')->cascadeOnUpdate()->cascadeOnDelete()->comment("Queue Setting ID");
             $table->string('unique_key')->nullable()->comment('Random unique key');
             $table->unsignedTinyInteger('active')->default(0)->comment("Active Status");
-            $table->unsignedInteger("active_count")->comment("Running Number");
-            $table->tinyText("ticket_group_prefix")->nullable()->comment("Queue Group Prefix");
+            $table->unsignedInteger("active_count")->default(0)->comment("Running Number");
+            $table->tinyText("ticket_group_prefix")->default('')->comment("Queue Group Prefix");
             $table->string("description", 100)->comment("Description");
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

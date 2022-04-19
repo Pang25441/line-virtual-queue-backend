@@ -71,7 +71,7 @@ class QueueCalendarSettingController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->sendBadResponse($validator->errors(), 'Validation Failed');
+            return $this->sendBadResponse(["errors" => $validator->errors()], 'Validation Failed');
         }
 
         $now = Carbon::now();
@@ -174,7 +174,7 @@ class QueueCalendarSettingController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->sendBadResponse($validator->errors(), 'Validation Failed');
+            return $this->sendBadResponse(["errors" => $validator->errors()], 'Validation Failed');
         }
 
         $now = Carbon::now();

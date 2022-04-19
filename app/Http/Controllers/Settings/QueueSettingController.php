@@ -37,7 +37,7 @@ class QueueSettingController extends Controller
         $user = Auth::user();
 
         if ($validator->fails()) {
-            return $this->sendBadResponse($validator->errors(), 'Validation Failed');
+            return $this->sendBadResponse(['errors' => $validator->errors()], 'Validation Failed');
         }
 
         $queueSetting = QueueSetting::whereUserId($user->id)->first();

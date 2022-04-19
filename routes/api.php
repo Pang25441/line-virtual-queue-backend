@@ -53,8 +53,10 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('ticket', 'index');
             Route::get('ticket/{id}', 'show');
             Route::post('ticket', 'store');
-            Route::put('ticket', 'update');
-            Route::put('delete', 'destroy');
+            Route::put('ticket/{id}', 'update');
+            Route::delete('ticket/{id}', 'destroy');
+            Route::get('ticketActive/{id}', 'ticketActive');
+            Route::get('ticketInactive/{id}', 'ticketInactive');
         });
     });
 });
