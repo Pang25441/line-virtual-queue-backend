@@ -191,7 +191,7 @@ class TicketGroupController extends Controller
         }
 
         $ticketGroup->active = 1;
-        $ticketGroup->activeCount++;
+        $ticketGroup->active_count++;
 
         try {
             $ticketGroup->save();

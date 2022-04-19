@@ -19,6 +19,8 @@ class CreateTicketTable extends Migration
             $table->foreignId('line_member_id')->constrained('line_member')->cascadeOnUpdate()->cascadeOnDelete()->comment("Line Member ID");
             $table->foreignId('status')->constrained('ma_ticket_status')->restrictOnDelete()->restrictOnDelete()->comment('ma_ticket_status ID');
             $table->unsignedInteger('ticket_group_active_count')->comment('Queue Ticket Group Active Count');
+            $table->unsignedSmallInteger('count')->comment('Queue Number Counter');
+            $table->string('ticket_number')->comment('Ticket number');
             $table->dateTime('pending_time')->useCurrent()->comment('Ticket print date time');
             $table->dateTime('calling_time')->nullable()->comment('Queue Calling time');
             $table->dateTime('executed_time')->nullable()->comment('Queue Start Process');
