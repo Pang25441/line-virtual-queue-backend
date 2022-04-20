@@ -32,6 +32,7 @@ Route::prefix('queue/ticket')->group(function () {
         Route::post('generate', 'generate_ticket');
         Route::post('my', 'current_ticket');
         Route::post('waiting', 'waiting_queue');
+        Route::post('test', 'test');
     });
 });
 

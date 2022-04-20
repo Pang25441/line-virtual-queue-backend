@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Line\LineConfig;
 use App\Models\QueueSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +41,8 @@ class QueueSettingController extends Controller
             return $this->sendBadResponse(['errors' => $validator->errors()], 'Validation Failed');
         }
 
+        $lineConfig = LineConfig::first();
+
         $queueSetting = QueueSetting::whereUserId($user->id)->first();
 
         if (!$queueSetting) {
@@ -47,6 +50,7 @@ class QueueSettingController extends Controller
         }
 
         try {
+            $queueSetting->line_config_id = $lineConfig->id;
             $queueSetting->user_id = $user->id;
             $queueSetting->display_name = $request->input('display_name');
             $queueSetting->detail = $request->input('detail');

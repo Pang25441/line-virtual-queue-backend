@@ -26,11 +26,16 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|LineMember whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|LineMember whereUserId($value)
  * @mixin \Eloquent
+ * @property-read \App\Models\Line\LineConfig $line_config
  */
 class LineMember extends Model
 {
     use HasFactory;
 
     protected $table = "line_member";
+
+    function line_config() {
+        return $this->belongsTo(LineConfig::class, 'line_config_id');
+    }
 
 }

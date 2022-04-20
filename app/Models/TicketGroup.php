@@ -31,6 +31,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|TicketGroup whereUniqueKey($value)
  * @method static \Illuminate\Database\Eloquent\Builder|TicketGroup whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string|null $ticket_group_code Random unique key
+ * @method static \Illuminate\Database\Eloquent\Builder|TicketGroup whereTicketGroupCode($value)
  */
 class TicketGroup extends Model
 {

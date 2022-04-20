@@ -25,6 +25,8 @@ namespace App\Models;
  * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting whereUserId($value)
  * @mixin \Eloquent
+ * @property int $line_config_id
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting whereLineConfigId($value)
  */
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;

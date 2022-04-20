@@ -74,7 +74,7 @@ class TicketGroupController extends Controller
 
         $ticketGroup = new TicketGroup();
         $ticketGroup->queue_setting_id = $queueSetting->id;
-        $ticketGroup->unique_key = uniqid();
+        $ticketGroup->ticket_group_code = uniqid();
         $ticketGroup->ticket_group_prefix = $request->input('ticket_group_prefix', '');
         $ticketGroup->description = $request->input('description', '');
 

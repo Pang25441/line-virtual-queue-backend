@@ -43,6 +43,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereTicketGroupId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property int $count Queue Number Counter
+ * @property string $ticket_number Ticket number
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereCount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereTicketNumber($value)
  */
 class Ticket extends Model
 {
