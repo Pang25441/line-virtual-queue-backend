@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Line\LineConfigController;
+use App\Http\Controllers\Queue\TicketController;
 use App\Http\Controllers\Settings\QueueCalendarSettingController;
 use App\Http\Controllers\Settings\QueueSettingController;
 use App\Http\Controllers\Settings\TicketGroupController;
@@ -25,7 +26,13 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
 });
 
 Route::apiResource('line_config', LineConfigController::class);
-Route::prefix('line_config')->controller(LineConfigController::class)->group(function () {
+
+Route::prefix('queue/ticket')->group(function () {
+    Route::controller(TicketController::class)->group(function(){
+        Route::post('generate', 'generate_ticket');
+        Route::post('my', 'current_ticket');
+        Route::post('waiting', 'waiting_queue');
+    });
 });
 
 
@@ -59,4 +66,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('ticketInactive/{id}', 'ticketInactive');
         });
     });
+
+
 });
