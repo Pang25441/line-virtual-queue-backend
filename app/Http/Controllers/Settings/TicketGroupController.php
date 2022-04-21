@@ -3,16 +3,33 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Master\MaTicketStatus;
 use App\Models\QueueSetting;
+use App\Models\Ticket;
 use App\Models\TicketGroup;
+use App\Models\TicketStatus;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class TicketGroupController extends Controller
 {
+    private $ticketStatus = [];
+
+    function __construct()
+    {
+        $ticketStatus = TicketStatus::all()->mapWithKeys(function ($status) {
+            return [$status['code'] => $status['id']];
+        });
+
+        $this->ticketStatus = $ticketStatus;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -178,7 +195,7 @@ class TicketGroupController extends Controller
         }
     }
 
-    public function ticketActive($id)
+    public function ticketGroupActive($id)
     {
         $user = Auth::user();
 
@@ -201,7 +218,7 @@ class TicketGroupController extends Controller
         }
     }
 
-    public function ticketInactive($id)
+    public function ticketGroupInactive($id)
     {
         $user = Auth::user();
 
@@ -217,9 +234,48 @@ class TicketGroupController extends Controller
 
         try {
             $ticketGroup->save();
+            $this->ticketLostUpdate($ticketGroup);
             return $this->sendOkResponse($ticketGroup, 'Ticket Group Inactivated');
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'DB Error');
         }
+    }
+
+    private function ticketLostUpdate(TicketGroup $ticketGroup)
+    {
+        $status = [$this->ticketStatus['PENDING'], $this->ticketStatus['CALLING']];
+        $remainTickets = Ticket::whereTicketGroupId($ticketGroup->id)
+            ->whereTicketGroupActiveCount($ticketGroup->ticket_group_active_count)
+            ->whereIn('status', $status)
+            ->get();
+
+        if ($remainTickets == 0) {
+            return true;
+        }
+
+        try {
+            $now = Carbon::now();
+            DB::beginTransaction();
+            foreach ($remainTickets as $ticket) {
+                if ($ticket->is_postpone == 1) {
+                    // Lost
+                    $ticket->status = $this->ticketStatus['LOST'];
+                    $ticket->lost_time = $now->toDateTimeString();
+                } else {
+                    // Reject
+                    $ticket->status = $this->ticketStatus['REJECT'];
+                    $ticket->reject_time = $now->toDateTimeString();
+                }
+                $ticket->save();
+            }
+            DB::commit();
+        } catch (\Throwable $th) {
+            //throw $th;
+            Log::error('ticketLostUpdate: Cannot update Lost Ticket');
+            DB::rollback();
+            return false;
+        }
+
+        return true;
     }
 }

@@ -14,6 +14,7 @@ class LineService
 
     private $lineConfig = null;
     private $oa_access_token = null;
+    private $lineUserId = null;
 
     function __construct($config = ['lineUserId' => null, 'accessToken' => null])
     {
@@ -25,7 +26,9 @@ class LineService
         if ($accessToken) {
             $this->verifyToken($accessToken);
         } else if ($lineUserId) {
-            $this->getLineConfigByUserId($lineUserId);
+            if ($this->getLineConfigByUserId($lineUserId)) {
+                $this->lineUserId = $lineUserId;
+            }
         }
     }
 
@@ -144,9 +147,16 @@ class LineService
         }
     }
 
-    function sendPushMessage(array $messageObject, string $userId)
+    function sendPushMessage(array $messageObject, string $userId = null)
     {
         $endpoint = '/v2/bot/message/push';
+
+        $userId = $userId ? $userId : $this->lineUserId;
+
+        if (!$userId) {
+            Log::error("sendPushMessage : User ID Not Set");
+            return false;
+        }
 
         $params = [
             'to' => $userId,

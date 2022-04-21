@@ -7,13 +7,27 @@ use App\Http\Services\LineService;
 use App\Models\Line\LineMember;
 use App\Models\Ticket;
 use App\Models\TicketGroup;
+use App\Models\TicketStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use LINE\LINEBot;
 
 class TicketController extends Controller
 {
+
+    private $ticketStatus = [];
+
+    function __construct()
+    {
+        $ticketStatus = TicketStatus::all()->mapWithKeys(function ($status) {
+            return [$status['code'] => $status['id']];
+        });
+
+        $this->ticketStatus = $ticketStatus;
+    }
 
     // function test(Request $request)
     // {
@@ -180,4 +194,67 @@ class TicketController extends Controller
           ]
         }
     }';
+
+    public function callNextQueue(Request $request, int $ticketGroupId)
+    {
+
+        $user = Auth::user();
+
+        $ticketGroup = TicketGroup::where('id', $ticketGroupId)->whereHas('queue_setting', function (Builder $query) use ($user) {
+            $query->whereUserId($user->id);
+        })->first();
+
+        if (!$ticketGroup) {
+            return response(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $calling_count = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->active_count)->whereStatus($this->ticketStatus['CALLING'])->whereIsPostpone(0)->count();
+        $waiting_queue = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->active_count)->whereStatus($this->ticketStatus['PENDING'])->orderBy('pending_time', 'asc')->with('line_member')->first();
+
+        if ($calling_count > 0) {
+            return $this->sendBadResponse($waiting_queue, 'Queue slot not empty');
+        }
+
+        $now = Carbon::now();
+        $waiting_queue->status = $this->ticketStatus['CALLING'];
+        $waiting_queue->calling_time = $now->toDateTimeString();
+
+        try {
+            $waiting_queue->save();
+        } catch (\Throwable $th) {
+            return $this->sendErrorResponse($th->getMessage(), 'Cannot Update Ticket Status');
+        }
+
+        // Send Queue Notify
+        $messageBuilder = new LINEBot\MessageBuilder\TextMessageBuilder("Your Queue Is Ready");
+        $message = $messageBuilder->buildMessage();
+
+        try {
+            $lineService = new LineService(['lineUserId' => $waiting_queue->line_member->user_id]);
+            $lineService->sendPushMessage($message);
+        } catch (\Throwable $th) {
+            Log::error('callNextQueue: ' . $th->getMessage());
+        }
+
+        return $this->sendOkResponse($waiting_queue);
+    }
+
+    public function executeQueue(Request $request, int $ticketId)
+    {
+        $user = Auth::user();
+
+        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting']);
+
+        if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
+            return response(['message' => 'Unauthenticated.'], 401);
+        }
+    }
+
+    public function postponeQueue(Request $request, int $ticketId)
+    {
+    }
+
+    public function rejectQueue(Request $request, int $ticketId)
+    {
+    }
 }
