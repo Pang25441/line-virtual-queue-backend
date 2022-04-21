@@ -7,6 +7,7 @@ use App\Http\Services\LineService;
 use App\Models\Line\LineMember;
 use App\Models\Ticket;
 use App\Models\TicketGroup;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -89,11 +90,95 @@ class TicketController extends Controller
         }
 
         // Send Ticket
+        $this->sendTicket($ticket);
 
         return $this->sendOkResponse($ticket, 'Ticket Added');
     }
 
-    private function sendTicket(Ticket $ticket) {
+    private function sendTicket(Ticket $ticket)
+    {
+        $pending_time_object = Carbon::parse($ticket->pending_time);
+
+        $description = $ticket->ticket_group()->description;
+        $queue_number = $ticket->ticket_number;
+        $pending_time = 'Date: ' . $pending_time_object->format("d M y") . 'Time: '.$pending_time_object->format("H:i");
+        $waiting_queue = '';
+        $display_name = $ticket->ticket_group()->queue_setting()->display_name;
+
+        $ticketTemplateStr = $this->ticketTemplate;
+
+        $ticketTemplateStr = str_replace(
+            ['{description}', '{ticket_number}', '{pending_time}', '{waiting_queue}', '{display_name}'],
+            [$description, $queue_number, $pending_time, $waiting_queue, $display_name],
+            $ticketTemplateStr
+        );
+
 
     }
+
+    private $ticketTemplate = '
+    {
+        "type": "bubble",
+        "header": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            {
+              "type": "text",
+              "text": "{description}",
+              "size": "12px",
+              "align": "center",
+              "wrap": false,
+              "maxLines": 1,
+              "adjustMode": "shrink-to-fit"
+            },
+            {
+              "type": "text",
+              "text": "{ticket_number}",
+              "size": "24px",
+              "weight": "bold",
+              "align": "center",
+              "wrap": true,
+              "adjustMode": "shrink-to-fit",
+              "maxLines": 1,
+              "margin": "6px"
+            },
+            {
+              "type": "text",
+              "text": "{pending_time}",
+              "size": "14px",
+              "align": "center",
+              "margin": "10px"
+            }
+          ]
+        },
+        "hero": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            {
+              "type": "text",
+              "text": "{waiting_queue}",
+              "size": "14px",
+              "align": "center"
+            }
+          ]
+        },
+        "body": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            {
+              "type": "text",
+              "text": "{display_name}",
+              "weight": "bold",
+              "size": "18px",
+              "align": "center",
+              "wrap": true,
+              "adjustMode": "shrink-to-fit",
+              "maxLines": 2
+            }
+          ]
+        }
+    }';
 }

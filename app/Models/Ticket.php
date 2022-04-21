@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Line\LineMember;
 use App\Models\Master\MaTicketStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -62,5 +63,9 @@ class Ticket extends Model
     function ticket_group()
     {
         return $this->belongsTo(TicketGroup::class, 'ticket_group_id');
+    }
+
+    function line_member() {
+        return $this->hasOne(LineMember::class, 'line_member_id');
     }
 }
