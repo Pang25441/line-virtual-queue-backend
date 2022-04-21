@@ -98,11 +98,12 @@ class TicketController extends Controller
     private function sendTicket(Ticket $ticket)
     {
         $pending_time_object = Carbon::parse($ticket->pending_time);
+        $waiting_count = Ticket::whereTicketGroupId($ticket->ticket_group_id)->whereTicketGroupActiveCount($ticket->ticket_group_active_count)->count();
 
         $description = $ticket->ticket_group()->description;
         $queue_number = $ticket->ticket_number;
-        $pending_time = 'Date: ' . $pending_time_object->format("d M y") . 'Time: '.$pending_time_object->format("H:i");
-        $waiting_queue = '';
+        $pending_time = 'Date: ' . $pending_time_object->format("d F Y") . ' Time: ' . $pending_time_object->format("H:i");
+        $waiting_queue = 'Waiting Queue: ' . $waiting_count;
         $display_name = $ticket->ticket_group()->queue_setting()->display_name;
 
         $ticketTemplateStr = $this->ticketTemplate;
@@ -112,8 +113,6 @@ class TicketController extends Controller
             [$description, $queue_number, $pending_time, $waiting_queue, $display_name],
             $ticketTemplateStr
         );
-
-
     }
 
     private $ticketTemplate = '
