@@ -29,23 +29,7 @@ class TicketController extends Controller
         $this->ticketStatus = $ticketStatus;
     }
 
-    // function test(Request $request)
-    // {
-    //     $userId = $request->input('userId');
-
-    //     try {
-    //         $lineService = new LineService(['lineUserId' => $userId]);
-    //     } catch (\Throwable $th) {
-    //         Log::error('TicketController: ' . $th->getMessage());
-    //         return response(['message' => 'Unauthenticated.'], 401);
-    //     }
-
-    //     $profile = $lineService->getProfile($userId);
-
-    //     return $this->sendOkResponse($profile);
-    // }
-
-    function generate_ticket(Request $request)
+    function generateTicket(Request $request)
     {
         $accessToken = $request->bearerToken();
 
@@ -239,6 +223,33 @@ class TicketController extends Controller
         return $this->sendOkResponse($waiting_queue);
     }
 
+    public function recallQueue(Request $request, int $ticketId)
+    {
+        $user = Auth::user();
+
+        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting', 'line_member']);
+
+        if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
+            return response(['message' => 'Unauthenticated.'], 401);
+        }
+
+        if ($ticket->status != $this->ticketStatus['CALLING']) {
+            return $this->sendBadResponse(null, 'Queue Cannot Recall');
+        }
+
+        // Send Queue Notify
+        $messageBuilder = new LINEBot\MessageBuilder\TextMessageBuilder("Your Queue Is Ready (Recall)");
+        $message = $messageBuilder->buildMessage();
+        try {
+            $lineService = new LineService(['lineUserId' => $ticket->line_member->user_id]);
+            $lineService->sendPushMessage($message);
+            return $this->sendOkResponse($ticket, 'Recall Success');
+        } catch (\Throwable $th) {
+            Log::error('recallQueue: ' . $th->getMessage());
+            return $this->sendErrorResponse(null, 'Recall failed');
+        }
+    }
+
     public function executeQueue(Request $request, int $ticketId)
     {
         $user = Auth::user();
@@ -248,13 +259,93 @@ class TicketController extends Controller
         if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
             return response(['message' => 'Unauthenticated.'], 401);
         }
+
+        $ticket->status = $this->ticketStatus['EXECUTED'];
+
+        try {
+            $ticket->save();
+            return $this->sendOkResponse($ticket, 'Queue Executed');
+        } catch (\Throwable $th) {
+            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+        }
     }
 
     public function postponeQueue(Request $request, int $ticketId)
     {
+        $user = Auth::user();
+
+        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting']);
+
+        if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
+            return response(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $ticket->is_postpone = 1;
+
+        try {
+            $ticket->save();
+            return $this->sendOkResponse($ticket, 'Queue Postpone');
+        } catch (\Throwable $th) {
+            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+        }
     }
 
     public function rejectQueue(Request $request, int $ticketId)
     {
+        $user = Auth::user();
+
+        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting']);
+
+        if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
+            return response(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $ticket->status = $this->ticketStatus['REJECTED'];
+
+        try {
+            $ticket->save();
+            return $this->sendOkResponse($ticket, 'Queue Rejected');
+        } catch (\Throwable $th) {
+            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+        }
+    }
+
+    public function currentTicket(Request $request)
+    {
+        $accessToken = $request->bearerToken();
+
+        if (!$accessToken) {
+            return response(['message' => 'Unauthenticated.'], 401);
+        }
+
+        try {
+            $lineService = new LineService(['accessToken' => $accessToken]);
+        } catch (\Throwable $th) {
+            Log::error('generate_ticket: ' . $th->getMessage());
+            return response(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $lineConfig = $lineService->getLineConfig();
+
+        if (!$lineConfig) {
+            return $this->sendBadResponse(['error' => "LINE_CONFIG_EMPTY"], 'Line Config Not Found');
+        }
+
+        $profile = $lineService->getProfile($accessToken);
+
+        $lineMember = LineMember::whereUserId($profile['userId'])->first();
+
+        $status = [$this->ticketStatus['PENDING'], $this->ticketStatus['CALLING']];
+        $ticket = Ticket::whereLineMemberId($lineMember->id)->whereIn('status', $status)->orderBy('pending_time', 'desc')->first();
+
+        if (!$ticket) {
+            return $this->sendBadResponse(null, 'Ticket not found');
+        }
+
+        $waiting_count = Ticket::whereTicketGroupId($ticket->ticket_group_id)->whereTicketGroupActiveCount($ticket->ticket_group_active_count)->where('pending_time', '<=', $ticket->pending_time)->whereIn('status', $status)->count();
+
+        $ticket->waiting_count = $waiting_count;
+
+        return $this->sendOkResponse($ticket);
     }
 }

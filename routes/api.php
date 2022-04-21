@@ -28,11 +28,9 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
 Route::apiResource('line_config', LineConfigController::class);
 
 Route::prefix('queue/ticket')->group(function () {
-    Route::controller(TicketController::class)->group(function(){
-        Route::post('generate', 'generate_ticket');
-        Route::post('my', 'current_ticket');
-        Route::post('waiting', 'waiting_queue');
-        Route::post('test', 'test');
+    Route::controller(TicketController::class)->group(function () {
+        Route::post('generate', 'generateTicket');
+        Route::post('my', 'currentTicket');
     });
 });
 
@@ -42,7 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/profile', [AuthController::class, 'profile']);
 
-    Route::prefix('setting')->group(function () {
+    Route::prefix('admin/setting')->group(function () {
         Route::controller(QueueSettingController::class)->group(function () {
             Route::get('queue', 'show');
             Route::post('queue', 'store');
@@ -68,5 +66,16 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
 
+    Route::prefix('admin/ticket')->group(function () {
+        Route::controller(TicketController::class)->group(function () {
+            Route::get('next/{ticketGroupId}', 'callNextQueue');
+            Route::get('recall/{ticketId}', 'recallQueue');
+            Route::get('execute/{ticketId}', 'executeQueue');
+            Route::get('postpone/{ticketId}','postponeQueue');
+            Route::get('reject/{ticketId}', 'rejectQueue');
 
+            // Route::get('pending/{ticketGroupId}', 'pendingQueue');
+            // Route::get('postpone/{ticketGroupId}', 'postponeQueue');
+        });
+    });
 });

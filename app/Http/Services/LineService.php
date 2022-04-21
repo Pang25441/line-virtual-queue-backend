@@ -190,10 +190,10 @@ class LineService
             if ($response->isSucceeded()) {
                 return $response;
             } else {
-                return throw new Exception($response->getHTTPStatus() . ' ' . $response->getRawBody());
+                throw new Exception($response->getHTTPStatus() . ' ' . $response->getRawBody());
             }
         } catch (\Throwable $th) {
-            return throw new Exception($th->getMessage());
+            throw new Exception($th->getMessage());
         }
     }
 }
