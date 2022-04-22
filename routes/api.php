@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Line\LineConfigController;
+use App\Http\Controllers\Queue\BookingAdminController;
 use App\Http\Controllers\Queue\BookingController;
 use App\Http\Controllers\Queue\TicketAdminController;
 use App\Http\Controllers\Queue\TicketController;
@@ -81,22 +82,22 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
 
-    Route::prefix('admin/ticket')->group(function () {
+    Route::controller(TicketAdminController::class)->prefix('admin/ticket')->group(function () {
+        Route::get('next/{ticketGroupId}', 'callNextQueue');
+        Route::get('recall/{ticketId}', 'recallQueue');
+        Route::get('execute/{ticketId}', 'executeQueue');
+        Route::get('postpone/{ticketId}', 'postponeQueue');
+        Route::get('reject/{ticketId}', 'rejectQueue');
 
-        Route::controller(TicketAdminController::class)->group(function () {
-            Route::get('next/{ticketGroupId}', 'callNextQueue');
-            Route::get('recall/{ticketId}', 'recallQueue');
-            Route::get('execute/{ticketId}', 'executeQueue');
-            Route::get('postpone/{ticketId}', 'postponeQueue');
-            Route::get('reject/{ticketId}', 'rejectQueue');
-
-            Route::get('ticket_list/{ticketGroupId}', 'getAllQueue');
-            Route::get('waiting_list/{ticketGroupId}', 'getWaitingQueue');
-        });
+        Route::get('ticket_list/{ticketGroupId}', 'getAllQueue');
+        Route::get('waiting_list/{ticketGroupId}', 'getWaitingQueue');
     });
 
-    Route::prefix('admin/calendar')->group(function () {
-
-        Route::get('');
+    Route::controller(BookingAdminController::class)->prefix('admin/booking')->group(function () {
+        Route::get('confirm/{bookingId}', 'confirmBooking');
+        Route::get('reject/{bookingId}', 'rejectBooking');
+        Route::post('revise/{bookingId}', 'reviseBooking');
+        Route::get('complete/{bookingId}', 'completeBooking');
+        Route::post('check_booking', 'getBookingByCode');
     });
 });

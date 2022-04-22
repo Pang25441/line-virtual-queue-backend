@@ -14,7 +14,9 @@ class LineService
 
     private $lineConfig = null;
     private $oa_access_token = null;
+
     private $lineUserId = null;
+    private $accessToken = null;
 
     function __construct($config = ['lineUserId' => null, 'accessToken' => null])
     {
@@ -24,7 +26,9 @@ class LineService
         extract($config);
 
         if ($accessToken) {
-            $this->verifyToken($accessToken);
+            if($this->verifyToken($accessToken)) {
+                $this->accessToken = $accessToken;
+            }
         } else if ($lineUserId) {
             if ($this->getLineConfigByUserId($lineUserId)) {
                 $this->lineUserId = $lineUserId;
@@ -113,8 +117,14 @@ class LineService
         }
     }
 
-    function getProfile(string $accessToken)
+    function getProfile(string $accessToken = null)
     {
+        $accessToken = $accessToken ? $accessToken : $this->accessToken;
+
+        if(!$accessToken) {
+            return false;
+        }
+
         if (!$this->oa_access_token) {
             Log::error("getProfile : OA Access Token not set");
             return false;

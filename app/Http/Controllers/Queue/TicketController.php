@@ -11,9 +11,7 @@ use App\Models\TicketStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use LINE\LINEBot;
 
 class TicketController extends Controller
 {
