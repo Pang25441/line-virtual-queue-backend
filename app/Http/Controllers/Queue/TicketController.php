@@ -71,6 +71,13 @@ class TicketController extends Controller
             $query->whereId($lineConfig->id);
         })->first();
 
+        $status = [$this->ticketStatus['PENDING'], $this->ticketStatus['PENDING']];
+        $existsTicket = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->ticket_group_active_count)->whereLineMemberId($lineMember->id)->whereIn('status', $status)->count();
+
+        if($existsTicket != 0) {
+            return $this->sendBadResponse(['error' => "TICKET_EXISTS"], 'Ticket already exists');
+        }
+
         $lastTicket = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->ticket_group_active_count)->max('count');
 
         $ticket = new Ticket();
@@ -111,6 +118,18 @@ class TicketController extends Controller
             [$description, $queue_number, $pending_time, $waiting_queue, $display_name],
             $ticketTemplateStr
         );
+
+        try {
+            $ticketTemplate = json_decode($ticketTemplateStr);
+
+            $lineService = new LineService(['lineUserId' => $ticket->line_member()->user_id]);
+
+            $lineService->sendPushMessage($ticketTemplate);
+        } catch (\Throwable $th) {
+            //throw $th;
+            Log::error('sendTicket: ' . $th->getMessage());
+        }
+
     }
 
     private $ticketTemplate = '
@@ -178,137 +197,6 @@ class TicketController extends Controller
           ]
         }
     }';
-
-    public function callNextQueue(Request $request, int $ticketGroupId)
-    {
-
-        $user = Auth::user();
-
-        $ticketGroup = TicketGroup::where('id', $ticketGroupId)->whereHas('queue_setting', function (Builder $query) use ($user) {
-            $query->whereUserId($user->id);
-        })->first();
-
-        if (!$ticketGroup) {
-            return response(['message' => 'Unauthenticated.'], 401);
-        }
-
-        $calling_count = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->active_count)->whereStatus($this->ticketStatus['CALLING'])->whereIsPostpone(0)->count();
-        $waiting_queue = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->active_count)->whereStatus($this->ticketStatus['PENDING'])->orderBy('pending_time', 'asc')->with('line_member')->first();
-
-        if ($calling_count > 0) {
-            return $this->sendBadResponse($waiting_queue, 'Queue slot not empty');
-        }
-
-        $now = Carbon::now();
-        $waiting_queue->status = $this->ticketStatus['CALLING'];
-        $waiting_queue->calling_time = $now->toDateTimeString();
-
-        try {
-            $waiting_queue->save();
-        } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'Cannot Update Ticket Status');
-        }
-
-        // Send Queue Notify
-        $messageBuilder = new LINEBot\MessageBuilder\TextMessageBuilder("Your Queue Is Ready");
-        $message = $messageBuilder->buildMessage();
-
-        try {
-            $lineService = new LineService(['lineUserId' => $waiting_queue->line_member->user_id]);
-            $lineService->sendPushMessage($message);
-        } catch (\Throwable $th) {
-            Log::error('callNextQueue: ' . $th->getMessage());
-        }
-
-        return $this->sendOkResponse($waiting_queue);
-    }
-
-    public function recallQueue(Request $request, int $ticketId)
-    {
-        $user = Auth::user();
-
-        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting', 'line_member']);
-
-        if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
-            return response(['message' => 'Unauthenticated.'], 401);
-        }
-
-        if ($ticket->status != $this->ticketStatus['CALLING']) {
-            return $this->sendBadResponse(null, 'Queue Cannot Recall');
-        }
-
-        // Send Queue Notify
-        $messageBuilder = new LINEBot\MessageBuilder\TextMessageBuilder("Your Queue Is Ready (Recall)");
-        $message = $messageBuilder->buildMessage();
-        try {
-            $lineService = new LineService(['lineUserId' => $ticket->line_member->user_id]);
-            $lineService->sendPushMessage($message);
-            return $this->sendOkResponse($ticket, 'Recall Success');
-        } catch (\Throwable $th) {
-            Log::error('recallQueue: ' . $th->getMessage());
-            return $this->sendErrorResponse(null, 'Recall failed');
-        }
-    }
-
-    public function executeQueue(Request $request, int $ticketId)
-    {
-        $user = Auth::user();
-
-        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting']);
-
-        if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
-            return response(['message' => 'Unauthenticated.'], 401);
-        }
-
-        $ticket->status = $this->ticketStatus['EXECUTED'];
-
-        try {
-            $ticket->save();
-            return $this->sendOkResponse($ticket, 'Queue Executed');
-        } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
-        }
-    }
-
-    public function postponeQueue(Request $request, int $ticketId)
-    {
-        $user = Auth::user();
-
-        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting']);
-
-        if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
-            return response(['message' => 'Unauthenticated.'], 401);
-        }
-
-        $ticket->is_postpone = 1;
-
-        try {
-            $ticket->save();
-            return $this->sendOkResponse($ticket, 'Queue Postpone');
-        } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
-        }
-    }
-
-    public function rejectQueue(Request $request, int $ticketId)
-    {
-        $user = Auth::user();
-
-        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting']);
-
-        if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
-            return response(['message' => 'Unauthenticated.'], 401);
-        }
-
-        $ticket->status = $this->ticketStatus['REJECTED'];
-
-        try {
-            $ticket->save();
-            return $this->sendOkResponse($ticket, 'Queue Rejected');
-        } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
-        }
-    }
 
     public function currentTicket(Request $request)
     {

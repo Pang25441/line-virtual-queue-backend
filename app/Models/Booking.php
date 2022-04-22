@@ -53,6 +53,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string|null $booking_code Random unique string
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking whereBookingCode($value)
  */
 class Booking extends Model
 {

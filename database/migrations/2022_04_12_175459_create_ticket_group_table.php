@@ -16,7 +16,7 @@ class CreateTicketGroupTable extends Migration
         Schema::create('ticket_group', function (Blueprint $table) {
             $table->id();
             $table->foreignId('queue_setting_id')->constrained('queue_setting')->cascadeOnUpdate()->cascadeOnDelete()->comment("Queue Setting ID");
-            $table->string('ticket_group_code')->nullable()->comment('Random unique key');
+            $table->string('ticket_group_code')->nullable()->comment('Random unique string');
             $table->unsignedTinyInteger('active')->default(0)->comment("Active Status");
             $table->unsignedInteger("active_count")->default(0)->comment("Running Number");
             $table->tinyText("ticket_group_prefix")->default('')->comment("Queue Group Prefix");

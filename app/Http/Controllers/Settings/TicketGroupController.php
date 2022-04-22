@@ -89,9 +89,10 @@ class TicketGroupController extends Controller
             return $this->sendBadResponse(["errors" => $validator->errors()], 'Validation Failed');
         }
 
+        $code_prefix = (string)$queueSetting->id;
         $ticketGroup = new TicketGroup();
         $ticketGroup->queue_setting_id = $queueSetting->id;
-        $ticketGroup->ticket_group_code = uniqid();
+        $ticketGroup->ticket_group_code = uniqid($code_prefix);
         $ticketGroup->ticket_group_prefix = $request->input('ticket_group_prefix', '');
         $ticketGroup->description = $request->input('description', '');
 

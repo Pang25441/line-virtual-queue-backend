@@ -48,6 +48,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $ticket_number Ticket number
  * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereCount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Ticket whereTicketNumber($value)
+ * @property-read LineMember|null $line_member
  */
 class Ticket extends Model
 {
