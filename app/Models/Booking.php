@@ -55,6 +55,10 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property string|null $booking_code Random unique string
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereBookingCode($value)
+ * @property string|null $complete_date Booking complete date time
+ * @property int|null $complete_by
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking whereCompleteBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking whereCompleteDate($value)
  */
 class Booking extends Model
 {

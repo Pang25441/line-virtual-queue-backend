@@ -9,6 +9,7 @@ use App\Http\Controllers\Queue\TicketController;
 use App\Http\Controllers\Settings\QueueCalendarSettingController;
 use App\Http\Controllers\Settings\QueueSettingController;
 use App\Http\Controllers\Settings\TicketGroupController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,7 +32,7 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
 
 Route::apiResource('line_config', LineConfigController::class);
 
-Route::prefix('queue')->group(function () {
+Route::middleware('lineLogin')->prefix('queue')->group(function () {
 
     Route::controller(TicketController::class)->prefix('ticket')->group(function () {
         Route::post('generate', 'generateTicket');
@@ -43,10 +44,14 @@ Route::prefix('queue')->group(function () {
         Route::get('header', 'getHeader');
         Route::get('calendar/{year}/{month}', 'getCalendarDetail');
         Route::post('register', 'store');
-        Route::post('update/{bookingId}', 'update');
-        Route::post('cancel', 'bookingCancel');
-        Route::get('{bookingId}', 'show');
+        // Route::post('update/{bookingId}', 'update');
+        Route::get('cancel/{bookingId}', 'bookingCancel');
+        Route::get('detail/{bookingId}', 'show');
     });
+});
+
+Route::controller(UserController::class)->group(function(){
+    Route::get('test', 'index');
 });
 
 

@@ -18,6 +18,8 @@ class LineService
     private $lineUserId = null;
     private $accessToken = null;
 
+    public $profile = null;
+
     function __construct($config = ['lineUserId' => null, 'accessToken' => null])
     {
         $lineUserId = null;
@@ -26,10 +28,15 @@ class LineService
         extract($config);
 
         if ($accessToken) {
+            Log::debug('LineService: accessToken ' . $accessToken);
             if($this->verifyToken($accessToken)) {
                 $this->accessToken = $accessToken;
+                if($profile = $this->getProfile($accessToken)) {
+                    $this->profile = $profile;
+                }
             }
         } else if ($lineUserId) {
+            Log::debug('LineService: lineUserId ' . $lineUserId);
             if ($this->getLineConfigByUserId($lineUserId)) {
                 $this->lineUserId = $lineUserId;
             }
@@ -119,7 +126,9 @@ class LineService
 
     function getProfile(string $accessToken = null)
     {
-        $accessToken = $accessToken ? $accessToken : $this->accessToken;
+        if(!$accessToken && $this->profile) {
+            return $this->profile;
+        }
 
         if(!$accessToken) {
             return false;

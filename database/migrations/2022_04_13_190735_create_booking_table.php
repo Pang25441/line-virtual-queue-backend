@@ -28,8 +28,8 @@ class CreateBookingTable extends Migration
             $table->foreignId('reject_by')->nullable()->constrained('users')->cascadeOnUpdate()->cascadeOnDelete()->comment("Reject by User ID");
             $table->dateTime('revise_date')->nullable()->comment('Booking Revise date time');
             $table->foreignId('revise_by')->nullable()->constrained('users')->cascadeOnUpdate()->cascadeOnDelete()->comment("Revise by User ID");
-            $table->dateTime('done_date')->nullable()->comment('Booking Done date time');
-            $table->foreignId('done_by')->nullable()->constrained('users')->cascadeOnUpdate()->cascadeOnDelete()->comment("Done by User ID");
+            $table->dateTime('complete_date')->nullable()->comment('Booking complete date time');
+            $table->foreignId('complete_by')->nullable()->constrained('users')->cascadeOnUpdate()->cascadeOnDelete()->comment("Complete by User ID");
             $table->dateTime('cancel_date')->nullable()->comment('Customer Cancel Datetime');
             $table->dateTime('lost_date')->nullable()->comment('Customer Lost Datetime');
             $table->timestamp('created_at')->useCurrent();

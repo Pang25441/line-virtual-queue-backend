@@ -29,19 +29,17 @@ class TicketController extends Controller
 
     function generateTicket(Request $request)
     {
-        $accessToken = $request->bearerToken();
 
         $ticketGroupCode = $request->input('ticket_group_code', null);
-
-        if (!$accessToken) {
-            return response(['message' => 'Unauthenticated.'], 401);
-        }
 
         if (!$ticketGroupCode) {
             return $this->sendBadResponse(['error' => "CODE_EMPTY"], 'Code not found');
         }
 
+        $lineService = $request->lineService;
+
         $ticketGroup = TicketGroup::whereTicketGroupCode($ticketGroupCode)->first();
+
         if (!$ticketGroup) {
             return $this->sendBadResponse(['error' => "CODE_REJECT"], 'Ticket Group Not Found');
         }
@@ -50,20 +48,9 @@ class TicketController extends Controller
             return $this->sendBadResponse(['error' => "TICKET_INACTIVE"], 'Ticket Group Inactivated');
         }
 
-        try {
-            $lineService = new LineService(['accessToken' => $accessToken]);
-        } catch (\Throwable $th) {
-            Log::error('generate_ticket: ' . $th->getMessage());
-            return response(['message' => 'Unauthenticated.'], 401);
-        }
-
         $lineConfig = $lineService->getLineConfig();
 
-        if (!$lineConfig) {
-            return $this->sendBadResponse(['error' => "LINE_CONFIG_EMPTY"], 'Line Config Not Found');
-        }
-
-        $profile = $lineService->getProfile($accessToken);
+        $profile = $lineService->getProfile();
 
         $lineMember = LineMember::whereUserId($profile['userId'])->whereHas('line_config', function (Builder $query) use ($lineConfig) {
             $query->whereId($lineConfig->id);
@@ -198,26 +185,9 @@ class TicketController extends Controller
 
     public function currentTicket(Request $request)
     {
-        $accessToken = $request->bearerToken();
+        $lineService = $request->lineService;
 
-        if (!$accessToken) {
-            return response(['message' => 'Unauthenticated.'], 401);
-        }
-
-        try {
-            $lineService = new LineService(['accessToken' => $accessToken]);
-        } catch (\Throwable $th) {
-            Log::error('generate_ticket: ' . $th->getMessage());
-            return response(['message' => 'Unauthenticated.'], 401);
-        }
-
-        $lineConfig = $lineService->getLineConfig();
-
-        if (!$lineConfig) {
-            return $this->sendBadResponse(['error' => "LINE_CONFIG_EMPTY"], 'Line Config Not Found');
-        }
-
-        $profile = $lineService->getProfile($accessToken);
+        $profile = $lineService->getProfile();
 
         $lineMember = LineMember::whereUserId($profile['userId'])->first();
 

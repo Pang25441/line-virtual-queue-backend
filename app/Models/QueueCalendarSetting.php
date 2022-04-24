@@ -35,6 +35,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|QueueCalendarSetting whereQueueSettingId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|QueueCalendarSetting whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property int $booking_limit Number of boking in one period of time
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueCalendarSetting whereBookingLimit($value)
  */
 class QueueCalendarSetting extends Model
 {
