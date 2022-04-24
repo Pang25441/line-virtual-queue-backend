@@ -11,8 +11,8 @@ namespace App\Models;
  * @property int $user_id
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\QueueCalendarSetting[] $queue_calendar_setting
- * @property-read int|null $queue_calendar_setting_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\CalendarSetting[] $calendar_setting
+ * @property-read int|null $calendar_setting_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TicketGroup[] $ticket_group
  * @property-read int|null $ticket_group_count
  * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting newModelQuery()
@@ -38,8 +38,8 @@ class QueueSetting extends Model
 
     protected $table = "queue_setting";
 
-    function queue_calendar_setting() {
-        return $this->hasMany(QueueCalendarSetting::class, 'queue_setting_id');
+    function calendar_setting() {
+        return $this->hasMany(CalendarSetting::class, 'queue_setting_id');
     }
 
     function ticket_group() {

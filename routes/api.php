@@ -6,7 +6,7 @@ use App\Http\Controllers\Queue\BookingAdminController;
 use App\Http\Controllers\Queue\BookingController;
 use App\Http\Controllers\Queue\TicketAdminController;
 use App\Http\Controllers\Queue\TicketController;
-use App\Http\Controllers\Settings\QueueCalendarSettingController;
+use App\Http\Controllers\Settings\CalendarSettingController;
 use App\Http\Controllers\Settings\QueueSettingController;
 use App\Http\Controllers\Settings\TicketGroupController;
 use App\Http\Controllers\UserController;
@@ -68,7 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('queue', 'update');
         });
 
-        Route::controller(QueueCalendarSettingController::class)->group(function () {
+        Route::controller(CalendarSettingController::class)->group(function () {
             Route::get('calendar', 'index');
             Route::get('calendar/{id}', 'show');
             Route::post('calendar', 'store');

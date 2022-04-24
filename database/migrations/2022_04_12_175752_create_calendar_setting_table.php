@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateQueueCalendarSettingTable extends Migration
+class CreateCalendarSettingTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateQueueCalendarSettingTable extends Migration
      */
     public function up()
     {
-        Schema::create('queue_calendar_setting', function (Blueprint $table) {
+        Schema::create('calendar_setting', function (Blueprint $table) {
             $table->id();
             $table->foreignId('queue_setting_id')->constrained('queue_setting')->cascadeOnUpdate()->cascadeOnDelete()->comment("Queue Setting ID");
             $table->date('calendar_date')->comment("Queue month");
@@ -35,9 +35,9 @@ class CreateQueueCalendarSettingTable extends Migration
      */
     public function down()
     {
-        Schema::table('queue_calendar_setting', function (Blueprint $table) {
+        Schema::table('calendar_setting', function (Blueprint $table) {
             $table->dropForeign(['queue_setting_id']);
         });
-        Schema::dropIfExists('queue_calendar_setting');
+        Schema::dropIfExists('calendar_setting');
     }
 }

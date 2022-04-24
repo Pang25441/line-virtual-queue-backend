@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * App\Models\Booking
  *
  * @property int $id
- * @property int $queue_calendar_setting_id
+ * @property int $calendar_setting_id
  * @property int $line_member_id
  * @property int $status
  * @property string $customer_name Customer Name
@@ -29,7 +29,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  * @property-read MaBookingStatus|null $booking_status
- * @property-read \App\Models\QueueCalendarSetting $calendar_setting
+ * @property-read \App\Models\CalendarSetting $calendar_setting
  * @method static \Illuminate\Database\Eloquent\Builder|Booking newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Booking newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Booking query()
@@ -45,7 +45,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereLineMemberId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereLostDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Booking whereQueueCalendarSettingId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking whereCalendarSettingId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereRejectBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereRejectDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereReviseBy($value)
@@ -73,6 +73,6 @@ class Booking extends Model
 
     function calendar_setting()
     {
-        return $this->belongsTo(QueueCalendarSetting::class, 'queue_calendar_setting_id');
+        return $this->belongsTo(CalendarSetting::class, 'calendar_setting_id');
     }
 }

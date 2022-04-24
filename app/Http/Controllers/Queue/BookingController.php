@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingStatus;
 use App\Models\Line\LineMember;
-use App\Models\QueueCalendarSetting;
+use App\Models\CalendarSetting;
 use App\Models\QueueSetting;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
@@ -83,7 +83,7 @@ class BookingController extends Controller
 
         try {
             $queueSetting = QueueSetting::whereLineConfigId($lineConfig->id)->first();
-            $calendar = QueueCalendarSetting::whereQueueSettingId($queueSetting->id)->whereCalendarDate($findMonth->toDateTimeString())->first();
+            $calendar = CalendarSetting::whereQueueSettingId($queueSetting->id)->whereCalendarDate($findMonth->toDateTimeString())->first();
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'DB Error');
         }
@@ -117,7 +117,7 @@ class BookingController extends Controller
 
         try {
             $queueSetting = QueueSetting::whereLineConfigId($lineConfig->id)->first();
-            $calendar = QueueCalendarSetting::whereQueueSettingId($queueSetting->id)->whereCalendarDate($bookingDate->format('Y-m-d'))->whereRaw($bookingDate->format("H:i:s") . " BETWEEN business_time_open AND business_time_close")->first();
+            $calendar = CalendarSetting::whereQueueSettingId($queueSetting->id)->whereCalendarDate($bookingDate->format('Y-m-d'))->whereRaw($bookingDate->format("H:i:s") . " BETWEEN business_time_open AND business_time_close")->first();
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'DB Error');
         }
@@ -142,7 +142,7 @@ class BookingController extends Controller
             $bookingStatus['CONFIRMED'],
             $bookingStatus['REVISE'],
         ];
-        $currentSlot = Booking::whereQueueCalendarSettingId($calendar->id)->whereBetween('booking_date', [$startTime, $endTime])->whereIn('status', $activeBookingStatus)->get();
+        $currentSlot = Booking::whereCalendarSettingId($calendar->id)->whereBetween('booking_date', [$startTime, $endTime])->whereIn('status', $activeBookingStatus)->get();
         if (count($currentSlot) >= $calendar->booking_limit) {
             return $this->sendBadResponse(['NO_SLOT'], 'Booking slot not available');
         }
@@ -152,7 +152,7 @@ class BookingController extends Controller
         // Save
         $lineMember = LineMember::whereUserId($profile['userId'])->whereLineConfigId($lineConfig->id)->first();
         $booking = new Booking();
-        $booking->queue_calendar_setting_id = $calendar->id;
+        $booking->calendar_setting_id = $calendar->id;
         $booking->line_member_id = $lineMember->id;
         $booking->status = $bookingStatus['PENDING'];
         $booking->booking_code = uniqid($calendar->queue_setting_id . $calendar->id . $lineMember->id);

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
-use App\Models\QueueCalendarSetting;
+use App\Models\CalendarSetting;
 use App\Models\QueueSetting;
 use Carbon\Carbon;
 use Exception;
@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class QueueCalendarSettingController extends Controller
+class CalendarSettingController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +27,7 @@ class QueueCalendarSettingController extends Controller
         try {
             $now = Carbon::now();
             $year = $request->query('year', $now->year);
-            $queueSetting = QueueSetting::whereUserId($user->id)->with(['queue_calendar_setting' => function ($query) use ($year) {
+            $queueSetting = QueueSetting::whereUserId($user->id)->with(['calendar_setting' => function ($query) use ($year) {
                 $query->whereYear('calendar_date', '=', $year);
                 $query->orderBy('calendar_date', 'asc');
             }])->first();
@@ -36,8 +36,8 @@ class QueueCalendarSettingController extends Controller
                 return $this->sendBadResponse(null, 'Queue Setting Not Found');
             }
 
-            $queueCalendarSetting = $queueSetting->queue_calendar_setting;
-            return $this->sendOkResponse($queueCalendarSetting, 'Calendar Found');
+            $CalendarSetting = $queueSetting->calendar_setting;
+            return $this->sendOkResponse($CalendarSetting, 'Calendar Found');
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'DB Error');
         }
@@ -66,7 +66,7 @@ class QueueCalendarSettingController extends Controller
             'business_time_close' => ['required'],
             'day_off' => ['array'],
             // 'allocate_time' => ['required'],
-            // 'queue_on_allocate' => ['required'],
+            // 'booking_limit' => ['required'],
             // 'active' => [],
         ]);
 
@@ -87,12 +87,12 @@ class QueueCalendarSettingController extends Controller
         }
 
         // Check if calendar exists
-        $queueCalendarSetting = QueueCalendarSetting::whereCalendarDate($calendar->toDateString())->whereHas('queue_setting', function (Builder $query) use ($user) {
+        $CalendarSetting = CalendarSetting::whereCalendarDate($calendar->toDateString())->whereHas('queue_setting', function (Builder $query) use ($user) {
             $query->where('user_id', $user->id);
         })->first();
 
-        if ($queueCalendarSetting) {
-            return $this->update($request, $queueCalendarSetting->id);
+        if ($CalendarSetting) {
+            return $this->update($request, $CalendarSetting->id);
         }
 
         try {
@@ -109,18 +109,18 @@ class QueueCalendarSettingController extends Controller
             return $this->sendBadResponse($th->getMessage(), $th->getMessage());
         }
 
-        $queueCalendarSetting = new QueueCalendarSetting();
-        $queueCalendarSetting->queue_setting_id = $queueSetting->id;
-        $queueCalendarSetting->calendar_date = $calendar->toDateString();
-        $queueCalendarSetting->business_time_open = $request->input('business_time_open', '09:00:00');
-        $queueCalendarSetting->business_time_close = $request->input('business_time_close', '18:00:00');
-        $queueCalendarSetting->day_off = $request->input('day_off', []);
-        $queueCalendarSetting->allocate_time = $request->input('allocate_time', '00:15:00');
-        $queueCalendarSetting->queue_on_allocate = $request->input('queue_on_allocate', 1);
+        $CalendarSetting = new CalendarSetting();
+        $CalendarSetting->queue_setting_id = $queueSetting->id;
+        $CalendarSetting->calendar_date = $calendar->toDateString();
+        $CalendarSetting->business_time_open = $request->input('business_time_open', '09:00:00');
+        $CalendarSetting->business_time_close = $request->input('business_time_close', '18:00:00');
+        $CalendarSetting->day_off = $request->input('day_off', []);
+        $CalendarSetting->allocate_time = $request->input('allocate_time', '00:15:00');
+        $CalendarSetting->booking_limit = $request->input('booking_limit', 1);
 
         try {
-            $result = $queueCalendarSetting->save();
-            return $this->sendOkResponse($queueCalendarSetting, 'Save Calendar Success');
+            $result = $CalendarSetting->save();
+            return $this->sendOkResponse($CalendarSetting, 'Save Calendar Success');
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'DB Error');
         }
@@ -137,11 +137,11 @@ class QueueCalendarSettingController extends Controller
         $user = Auth::user();
 
         try {
-            $queueCalendarSetting = QueueCalendarSetting::whereId($id)->whereHas('queue_setting', function (Builder $query) use ($user) {
+            $CalendarSetting = CalendarSetting::whereId($id)->whereHas('queue_setting', function (Builder $query) use ($user) {
                 $query->where('user_id', $user->id);
             })->first();
 
-            return $this->sendOkResponse($queueCalendarSetting, 'Calendar Found');
+            return $this->sendOkResponse($CalendarSetting, 'Calendar Found');
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'DB Error');
         }
@@ -157,11 +157,11 @@ class QueueCalendarSettingController extends Controller
     {
         $user = Auth::user();
 
-        $queueCalendarSetting = QueueCalendarSetting::whereId($id)->whereHas('queue_setting', function (Builder $query) use ($user) {
+        $CalendarSetting = CalendarSetting::whereId($id)->whereHas('queue_setting', function (Builder $query) use ($user) {
             $query->where('user_id', $user->id);
         })->first();
 
-        if (!$queueCalendarSetting) {
+        if (!$CalendarSetting) {
             return $this->sendBadResponse(null, 'Original data not found');
         }
 
@@ -170,7 +170,7 @@ class QueueCalendarSettingController extends Controller
             'business_time_close' => ['required'],
             'day_off' => ['array'],
             'allocate_time' => ['required'],
-            'queue_on_allocate' => ['required'],
+            'booking_limit' => ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -178,7 +178,7 @@ class QueueCalendarSettingController extends Controller
         }
 
         $now = Carbon::now();
-        $calendar = Carbon::parse($queueCalendarSetting->carlendar_date);
+        $calendar = Carbon::parse($CalendarSetting->carlendar_date);
 
         try {
             // Calendar Date is older than Now
@@ -194,15 +194,15 @@ class QueueCalendarSettingController extends Controller
             return $this->sendBadResponse($th->getMessage(), $th->getMessage());
         }
 
-        $queueCalendarSetting->business_time_open = $request->input('business_time_open', $queueCalendarSetting->business_time_open);
-        $queueCalendarSetting->business_time_close = $request->input('business_time_close', $queueCalendarSetting->business_time_close);
-        $queueCalendarSetting->day_off = $request->input('day_off', $queueCalendarSetting->day_off);
-        $queueCalendarSetting->allocate_time = $request->input('allocate_time', $queueCalendarSetting->allocate_time);
-        $queueCalendarSetting->queue_on_allocate = $request->input('queue_on_allocate', $queueCalendarSetting->queue_on_allocate);
+        $CalendarSetting->business_time_open = $request->input('business_time_open', $CalendarSetting->business_time_open);
+        $CalendarSetting->business_time_close = $request->input('business_time_close', $CalendarSetting->business_time_close);
+        $CalendarSetting->day_off = $request->input('day_off', $CalendarSetting->day_off);
+        $CalendarSetting->allocate_time = $request->input('allocate_time', $CalendarSetting->allocate_time);
+        $CalendarSetting->booking_limit = $request->input('booking_limit', $CalendarSetting->booking_limit);
 
         try {
-            $result = $queueCalendarSetting->save();
-            return $this->sendOkResponse($queueCalendarSetting, 'Update Calendar Success');
+            $result = $CalendarSetting->save();
+            return $this->sendOkResponse($CalendarSetting, 'Update Calendar Success');
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'DB Error');
         }
@@ -214,19 +214,19 @@ class QueueCalendarSettingController extends Controller
         $user = Auth::user();
 
         try {
-            $queueCalendarSetting = QueueCalendarSetting::whereId($id)->whereHas('queue_setting', function (Builder $query) use ($user) {
+            $CalendarSetting = CalendarSetting::whereId($id)->whereHas('queue_setting', function (Builder $query) use ($user) {
                 $query->where('user_id', $user->id);
             })->first();
         } catch (\Throwable $th) {
             return $this->sendErrorResponse(null, 'DB Error');
         }
 
-        if (!$queueCalendarSetting) {
+        if (!$CalendarSetting) {
             return $this->sendBadResponse(null, 'Calendar Not found');
         }
 
-        $queueCalendarSetting->active = 1;
-        $result = $queueCalendarSetting->save();
+        $CalendarSetting->active = 1;
+        $result = $CalendarSetting->save();
 
         if ($result) {
             return $this->sendOkResponse(true, 'Calendar is activated');

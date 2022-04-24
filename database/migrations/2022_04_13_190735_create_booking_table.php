@@ -15,7 +15,7 @@ class CreateBookingTable extends Migration
     {
         Schema::create('booking', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('queue_calendar_setting_id')->constrained('queue_calendar_setting')->cascadeOnUpdate()->cascadeOnDelete()->comment("Queue Calendar Setting ID");
+            $table->foreignId('calendar_setting_id')->constrained('calendar_setting')->cascadeOnUpdate()->cascadeOnDelete()->comment("Calendar Setting ID");
             $table->foreignId('line_member_id')->constrained('line_member')->cascadeOnUpdate()->cascadeOnDelete()->comment("Line Member ID");
             $table->foreignId('status')->constrained('ma_booking_status')->restrictOnUpdate()->restrictOnDelete()->comment('ma_booking_status ID');
             $table->string('booking_code')->nullable()->comment('Random unique string');
@@ -45,7 +45,7 @@ class CreateBookingTable extends Migration
     public function down()
     {
         Schema::table('booking', function (Blueprint $table) {
-            $table->dropForeign(['queue_calendar_setting_id']);
+            $table->dropForeign(['calendar_setting_id']);
             $table->dropForeign(['line_member_id']);
             $table->dropForeign(['status']);
         });
