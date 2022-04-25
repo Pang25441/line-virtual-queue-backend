@@ -7,6 +7,7 @@ use App\Models\Line\LineConfig;
 use App\Models\QueueSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class QueueSettingController extends Controller
@@ -76,8 +77,8 @@ class QueueSettingController extends Controller
             $queueSetting = QueueSetting::where('user_id', $user->id)->first();
             return $this->sendOkResponse($queueSetting, $queueSetting ? 'Setting found' : 'Setting not found');
         } catch (\Throwable $th) {
-            //throw $th;
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("QueueSettingController: show: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 

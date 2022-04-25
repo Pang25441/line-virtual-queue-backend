@@ -22,6 +22,7 @@ class LineLogin
         $accessToken = $request->bearerToken();
 
         if (!$accessToken) {
+            Log::debug("LineLogin Middleware: Access token is empty");
             throw new AuthenticationException('Line Account Unauthenticated.');
         }
 
@@ -31,6 +32,7 @@ class LineLogin
             $lineConfig = $lineService->getLineConfig();
 
             if (!$lineConfig) {
+                Log::error("LineLogin Middleware: Line login not found");
                 return response(
                     [
                         'status' => 400,

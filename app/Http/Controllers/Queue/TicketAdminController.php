@@ -114,7 +114,8 @@ class TicketAdminController extends Controller
             $ticket->save();
             return $this->sendOkResponse($ticket, 'Queue Executed');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("executeQueue: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -134,7 +135,8 @@ class TicketAdminController extends Controller
             $ticket->save();
             return $this->sendOkResponse($ticket, 'Queue Postpone');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("postponeQueue: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -154,7 +156,8 @@ class TicketAdminController extends Controller
             $ticket->save();
             return $this->sendOkResponse($ticket, 'Queue Rejected');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("rejectQueue: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -174,7 +177,8 @@ class TicketAdminController extends Controller
             $tickets = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->ticket_group_active_count)->orderBy('pending_time', 'asc')->get();
             return $this->sendOkResponse($tickets);
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("getAllQueue: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -201,7 +205,8 @@ class TicketAdminController extends Controller
                 ->get();
             return $this->sendOkResponse($tickets);
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("getWaitingQueue: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 }

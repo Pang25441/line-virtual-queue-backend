@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Queue\BookingController;
+use App\Http\Controllers\Settings\TicketGroupController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +18,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     // return view('welcome');
 });
+
+Route::get('/booking_code/{bookingCode}', [BookingController::class, 'getBookingQRCode']);
+
+Route::get('/ticket_group_code/{ticketGroupCode}', [TicketGroupController::class, 'getTicketGroupQRCode']);

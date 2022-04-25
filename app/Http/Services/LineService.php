@@ -7,6 +7,7 @@ use App\Models\Line\LineMember;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Client;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\Builder;
 
 class LineService
@@ -34,6 +35,8 @@ class LineService
                 if($profile = $this->getProfile($accessToken)) {
                     $this->profile = $profile;
                 }
+            } else {
+                throw new AuthenticationException('Line Account Unauthenticated.');
             }
         } else if ($lineUserId) {
             Log::debug('LineService: lineUserId ' . $lineUserId);
@@ -130,7 +133,10 @@ class LineService
             return $this->profile;
         }
 
+        $accessToken = $accessToken ? $accessToken : $this->accessToken;
+
         if(!$accessToken) {
+            Log::error("getProfile : No Access token");
             return false;
         }
 

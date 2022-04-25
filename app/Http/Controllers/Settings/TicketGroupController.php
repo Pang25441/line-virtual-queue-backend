@@ -9,6 +9,8 @@ use App\Models\Ticket;
 use App\Models\TicketGroup;
 use App\Models\TicketStatus;
 use Carbon\Carbon;
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TicketGroupController extends Controller
 {
@@ -44,7 +47,8 @@ class TicketGroupController extends Controller
                 $query->whereUserId($user->id);
             })->orderBy('ticket_group_prefix', 'ASC')->get();
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("TicketGroupController: index: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
 
         return $this->sendOkResponse($ticketGroup);
@@ -100,7 +104,8 @@ class TicketGroupController extends Controller
             $ticketGroup->save();
             return $this->sendOkResponse($ticketGroup, 'Ticket Group Saved');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("TicketGroupController: store: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -124,7 +129,8 @@ class TicketGroupController extends Controller
             }
             return $this->sendBadResponse(null, 'Ticket Group Not found');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("TicketGroupController: show: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -163,7 +169,8 @@ class TicketGroupController extends Controller
             $ticketGroup->save();
             return $this->sendOkResponse($ticketGroup, 'Ticket Group Saved');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("TicketGroupController: update: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -192,7 +199,8 @@ class TicketGroupController extends Controller
             }
             return $this->sendBadResponse(false, "Cannot Delete Ticket Group");
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("TicketGroupController: destroy: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -215,7 +223,8 @@ class TicketGroupController extends Controller
             $ticketGroup->save();
             return $this->sendOkResponse($ticketGroup, 'Ticket Group Activated');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("TicketGroupController: ticketGroupActive: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -238,7 +247,8 @@ class TicketGroupController extends Controller
             $this->ticketLostUpdate($ticketGroup);
             return $this->sendOkResponse($ticketGroup, 'Ticket Group Inactivated');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("TicketGroupController: ticketGroupInactive: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -278,5 +288,39 @@ class TicketGroupController extends Controller
         }
 
         return true;
+    }
+
+    function getTicketGroupQRCode(string $ticketGroupCode)
+    {
+        $path = storage_path('app/public/ticket_group_code');
+        $target = $path . "/" . $ticketGroupCode . ".svg";
+
+        try {
+            if (is_file($target)) {
+                return response()->file($target);
+            }
+        } catch (\Throwable $th) {
+            throw new NotFoundHttpException();
+        }
+
+        $options = new QROptions([
+            'version'    => 3,
+            'outputType' => QRCode::OUTPUT_MARKUP_SVG,
+            'eccLevel'   => QRCode::ECC_L,
+            'quietzoneSize' => 1,
+        ]);
+
+        $qrcode = new QRCode($options);
+
+        try {
+            if (!is_dir($path)) {
+                mkdir($path);
+            }
+        } catch (\Throwable $th) {
+            Log::error('getTicketGroupQRCode: ' . $th->getMessage());
+            throw new NotFoundHttpException();
+        }
+
+        return $qrcode->render($ticketGroupCode, $target);
     }
 }

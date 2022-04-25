@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class CalendarSettingController extends Controller
@@ -39,7 +40,8 @@ class CalendarSettingController extends Controller
             $CalendarSetting = $queueSetting->calendar_setting;
             return $this->sendOkResponse($CalendarSetting, 'Calendar Found');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("CalendarSettingController: index: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -122,7 +124,8 @@ class CalendarSettingController extends Controller
             $result = $CalendarSetting->save();
             return $this->sendOkResponse($CalendarSetting, 'Save Calendar Success');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("CalendarSettingController: store: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -143,7 +146,8 @@ class CalendarSettingController extends Controller
 
             return $this->sendOkResponse($CalendarSetting, 'Calendar Found');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("CalendarSettingController: show: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -204,7 +208,8 @@ class CalendarSettingController extends Controller
             $result = $CalendarSetting->save();
             return $this->sendOkResponse($CalendarSetting, 'Update Calendar Success');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("CalendarSettingController: update: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 

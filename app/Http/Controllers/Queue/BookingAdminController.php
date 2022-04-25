@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Queue;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\LineService;
 use App\Models\Booking;
 use App\Models\BookingStatus;
 use App\Models\CalendarSetting;
@@ -67,10 +68,18 @@ class BookingAdminController extends Controller
 
         try {
             $booking->save();
-            return $this->sendOkResponse($booking, 'Booking confirmed');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse(['error' => 'DB Error'], 'DB Error');
+            Log::error('confirmBooking: ' . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
+
+        try {
+            $this->sendBooking($booking);
+        } catch (\Throwable $th) {
+            Log::error("confirmBooking: sendBooking: " . $th->getMessage());
+        }
+
+        return $this->sendOkResponse($booking, 'Booking confirmed');
     }
 
     function rejectBooking(Request $request, int $bookingId)
@@ -106,7 +115,7 @@ class BookingAdminController extends Controller
             return $this->sendOkResponse($booking, 'Booking Rejected');
         } catch (\Throwable $th) {
             Log::error('rejectBooking: ' . $th->getMessage());
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -145,7 +154,8 @@ class BookingAdminController extends Controller
             $queueSetting = QueueSetting::whereUserId($user->id)->first();
             $calendar = CalendarSetting::whereQueueSettingId($queueSetting->id)->whereCalendarDate($bookingDate->format('Y-m-01'))->whereActive(1)->whereRaw("'" . $bookingDate->format('H:i:s') . "'" . " BETWEEN business_time_open AND business_time_close")->first();
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error('reviseBooking: ' . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
 
         // If not in business time
@@ -196,7 +206,8 @@ class BookingAdminController extends Controller
             $booking->save();
             return $this->sendOkResponse($booking, 'Booking revise and confirmed');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse(['error' => 'DB Error'], 'DB Error');
+            Log::error('reviseBooking: ' . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -231,7 +242,8 @@ class BookingAdminController extends Controller
             $booking->save();
             return $this->sendOkResponse($booking, 'Booking Completed');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse(['error' => 'DB Error'], 'DB Error');
+            Log::error("completeBooking: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -374,6 +386,31 @@ class BookingAdminController extends Controller
 
     private function sendBooking(Booking $booking)
     {
-        $needle = ['display_name', 'detail', 'customer_name', 'booking_date', 'booking_time', 'qrcode_url'];
+        $queueSetting = $booking->calendar_setting->queue_setting;
+
+        $search = ['{display_name}', '{detail}', '{customer_name}', '{booking_date}', '{booking_time}', '{qrcode_url}'];
+
+        $bookingTime = Carbon::parse($booking->booking_date);
+
+        $replace = [
+            $queueSetting->display_name,
+            $queueSetting->detail,
+            $booking->customer_name,
+            $bookingTime->format("d F Y"),
+            $bookingTime->format("H:i"),
+            url("/booking_code/$booking->booking_code")
+        ];
+
+        $bookingTemplate = $this->bookingTemplate;
+
+        $bookingCard = str_replace($search, $replace, $bookingTemplate);
+
+        $lineMember = $booking->line_member();
+
+        $lineService = new LineService(['lineUserId' => $lineMember->id]);
+
+        $lineService->sendPushMessage(json_decode($bookingCard));
+
+        // Log::debug(var_export($bookingCard, true));
     }
 }

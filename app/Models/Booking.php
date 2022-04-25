@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Line\LineMember;
 use App\Models\Master\MaBookingStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -80,5 +81,10 @@ class Booking extends Model
     function calendar_setting()
     {
         return $this->belongsTo(CalendarSetting::class, 'calendar_setting_id');
+    }
+
+    function line_member()
+    {
+        return $this->hasOne(LineMember::class, 'id', 'line_member_id');
     }
 }

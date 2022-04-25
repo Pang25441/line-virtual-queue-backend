@@ -10,9 +10,12 @@ use App\Models\CalendarSetting;
 use App\Models\QueueSetting;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BookingController extends Controller
 {
@@ -42,7 +45,8 @@ class BookingController extends Controller
         try {
             $booking = Booking::whereLineMemberId($lineMember->id)->whereIn('status', $status)->get();
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("my_booking: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
 
         return $this->sendOkResponse($booking, 'Success');
@@ -85,7 +89,8 @@ class BookingController extends Controller
             $queueSetting = QueueSetting::whereLineConfigId($lineConfig->id)->first();
             $calendar = CalendarSetting::whereQueueSettingId($queueSetting->id)->whereCalendarDate($findMonth->toDateTimeString())->first();
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("getCalendarDetail: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
 
         return $this->sendOkResponse($calendar, 'Success');
@@ -119,7 +124,8 @@ class BookingController extends Controller
             $queueSetting = QueueSetting::whereLineConfigId($lineConfig->id)->first();
             $calendar = CalendarSetting::whereQueueSettingId($queueSetting->id)->whereCalendarDate($bookingDate->format('Y-m-d'))->whereActive(1)->whereRaw($bookingDate->format("H:i:s") . " BETWEEN business_time_open AND business_time_close")->first();
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("BookingController: store: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
 
         // If not in business time
@@ -164,7 +170,8 @@ class BookingController extends Controller
             $result = $booking->save();
             return $this->sendOkResponse($result, 'Booking Successful');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("BookingController: store: save: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
     }
 
@@ -176,15 +183,13 @@ class BookingController extends Controller
     {
         $lineService = $request->lineService;
 
-        // $lineConfig = $lineService->getLineConfig();
-
         $profile = $lineService->getProfile();
 
         $lineMember = LineMember::whereUserId($profile['userId'])->first();
 
         $booking = Booking::whereId($bookingId)->whereLineMemberId($lineMember->id);
 
-        if(!$booking) {
+        if (!$booking) {
             return $this->sendBadResponse(null, 'Booking not found');
         }
 
@@ -207,7 +212,7 @@ class BookingController extends Controller
 
         $booking = Booking::whereId($bookingId)->whereLineMemberId($lineMember->id)->whereIn('status', $activeBookingStatus)->first();
 
-        if(!$booking) {
+        if (!$booking) {
             return $this->sendBadResponse(null, 'Booking not found');
         }
 
@@ -215,9 +220,44 @@ class BookingController extends Controller
 
         try {
             $booking->save();
-            return $this->sendOkResponse(true,'Booking Canceled');
+            return $this->sendOkResponse(true, 'Booking Canceled');
         } catch (\Throwable $th) {
-            return $this->sendErrorResponse($th->getMessage(), 'DB Error');
+            Log::error("bookingCancel: " . $th->getMessage());
+            return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
+    }
+
+    function getBookingQRCode(string $bookingCode)
+    {
+        $path = storage_path('app/public/booking_code');
+        $target = $path . "/" . $bookingCode . ".svg";
+
+        try {
+            if (is_file($target)) {
+                return response()->file($target);
+            }
+        } catch (\Throwable $th) {
+            throw new NotFoundHttpException();
+        }
+
+        $options = new QROptions([
+            'version'    => 3,
+            'outputType' => QRCode::OUTPUT_MARKUP_SVG,
+            'eccLevel'   => QRCode::ECC_L,
+            'quietzoneSize' => 1,
+        ]);
+
+        $qrcode = new QRCode($options);
+
+        try {
+            if (!is_dir($path)) {
+                mkdir($path);
+            }
+        } catch (\Throwable $th) {
+            Log::error('getBookingQRCode: ' . $th->getMessage());
+            throw new NotFoundHttpException();
+        }
+
+        return $qrcode->render($bookingCode, $target);
     }
 }
