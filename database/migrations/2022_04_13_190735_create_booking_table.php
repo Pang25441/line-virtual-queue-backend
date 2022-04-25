@@ -22,8 +22,8 @@ class CreateBookingTable extends Migration
             $table->string('customer_name', 150)->comment('Customer Name');
             $table->string('customer_contact', 100)->comment('Contact');
             $table->dateTime('booking_date')->comment('Booking date/time');
-            $table->dateTime('confirmed_date')->nullable()->comment('Booking confirmed Datetime');
-            $table->foreignId('confirmed_by')->nullable()->constrained('users')->cascadeOnUpdate()->cascadeOnDelete()->comment("Confirmed by User ID");
+            $table->dateTime('confirm_date')->nullable()->comment('Booking confirmed Datetime');
+            $table->foreignId('confirm_by')->nullable()->constrained('users')->cascadeOnUpdate()->cascadeOnDelete()->comment("Confirmed by User ID");
             $table->dateTime('reject_date')->nullable()->comment('Booking reject date time');
             $table->foreignId('reject_by')->nullable()->constrained('users')->cascadeOnUpdate()->cascadeOnDelete()->comment("Reject by User ID");
             $table->dateTime('revise_date')->nullable()->comment('Booking Revise date time');

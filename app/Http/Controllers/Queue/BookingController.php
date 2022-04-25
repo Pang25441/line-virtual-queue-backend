@@ -117,7 +117,7 @@ class BookingController extends Controller
 
         try {
             $queueSetting = QueueSetting::whereLineConfigId($lineConfig->id)->first();
-            $calendar = CalendarSetting::whereQueueSettingId($queueSetting->id)->whereCalendarDate($bookingDate->format('Y-m-d'))->whereRaw($bookingDate->format("H:i:s") . " BETWEEN business_time_open AND business_time_close")->first();
+            $calendar = CalendarSetting::whereQueueSettingId($queueSetting->id)->whereCalendarDate($bookingDate->format('Y-m-d'))->whereActive(1)->whereRaw($bookingDate->format("H:i:s") . " BETWEEN business_time_open AND business_time_close")->first();
         } catch (\Throwable $th) {
             return $this->sendErrorResponse($th->getMessage(), 'DB Error');
         }

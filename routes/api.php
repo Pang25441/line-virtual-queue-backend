@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Line\LineConfigController;
 use App\Http\Controllers\Queue\BookingAdminController;
 use App\Http\Controllers\Queue\BookingController;
 use App\Http\Controllers\Queue\TicketAdminController;
@@ -30,7 +29,7 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::get('logout', 'logout');
 });
 
-Route::apiResource('line_config', LineConfigController::class);
+// Route::apiResource('line_config', LineConfigController::class);
 
 Route::middleware('lineLogin')->prefix('queue')->group(function () {
 
@@ -104,5 +103,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('revise/{bookingId}', 'reviseBooking');
         Route::get('complete/{bookingId}', 'completeBooking');
         Route::post('check_booking', 'getBookingByCode');
+        Route::get('detail/{bookingId}', 'show');
     });
 });

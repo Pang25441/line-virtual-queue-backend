@@ -59,6 +59,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $complete_by
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereCompleteBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereCompleteDate($value)
+ * @property string|null $confirm_date Booking confirmed Datetime
+ * @property int|null $confirm_by
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking whereConfirmBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking whereConfirmDate($value)
  */
 class Booking extends Model
 {
@@ -66,9 +70,11 @@ class Booking extends Model
 
     protected $table = "booking";
 
+    protected $with = ['booking_status'];
+
     function booking_status()
     {
-        return $this->hasOne(MaBookingStatus::class, 'status');
+        return $this->hasOne(MaBookingStatus::class, 'id', 'status');
     }
 
     function calendar_setting()

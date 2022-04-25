@@ -56,9 +56,11 @@ class Ticket extends Model
 
     protected $table = "ticket";
 
+    protected $with = ['ticket_status'];
+
     function ticket_status()
     {
-        return $this->hasOne(MaTicketStatus::class, 'status');
+        return $this->hasOne(MaTicketStatus::class, 'id', 'status');
     }
 
     function ticket_group()
