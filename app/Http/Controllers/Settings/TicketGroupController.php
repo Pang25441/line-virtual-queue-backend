@@ -216,6 +216,10 @@ class TicketGroupController extends Controller
             return $this->sendBadResponse(null, 'Ticket Group Not found');
         }
 
+        if ($ticketGroup->active == 1) {
+            return $this->sendBadResponse(['error' => 'NO_ACTION'], 'Ticket Group already active');
+        }
+
         $ticketGroup->active = 1;
         $ticketGroup->active_count++;
 
@@ -240,6 +244,10 @@ class TicketGroupController extends Controller
             return $this->sendBadResponse(null, 'Ticket Group Not found');
         }
 
+        if ($ticketGroup->active == 0) {
+            return $this->sendBadResponse(['error' => 'NO_ACTION'], 'Ticket Group already inactive');
+        }
+
         $ticketGroup->active = 0;
 
         try {
@@ -258,7 +266,7 @@ class TicketGroupController extends Controller
         $remainTickets = Ticket::whereTicketGroupId($ticketGroup->id)
             ->whereTicketGroupActiveCount($ticketGroup->ticket_group_active_count)
             ->whereIn('status', $status)
-            ->get();
+            ->count();
 
         if ($remainTickets == 0) {
             return true;
