@@ -44,4 +44,14 @@ class TicketGroup extends Model
     {
         return $this->belongsTo(QueueSetting::class, 'queue_setting_id');
     }
+
+    function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'id', 'ticket_group_id');
+    }
+
+    function current_tickets()
+    {
+        return $this->hasMany(Ticket::class, 'id', 'ticket_group_id')->where('ticket_group_active_count', $this->active_count);
+    }
 }

@@ -49,7 +49,7 @@ Route::middleware('lineLogin')->prefix('queue')->group(function () {
     });
 });
 
-Route::controller(UserController::class)->group(function(){
+Route::controller(UserController::class)->group(function () {
     Route::get('test', 'index');
 });
 
@@ -87,6 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::controller(TicketAdminController::class)->prefix('admin/ticket')->group(function () {
+        Route::get('groups', 'getQueueGroup');
         Route::get('next/{ticketGroupId}', 'callNextQueue');
         Route::get('recall/{ticketId}', 'recallQueue');
         Route::get('execute/{ticketId}', 'executeQueue');

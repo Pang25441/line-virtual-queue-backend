@@ -28,6 +28,22 @@ class TicketAdminController extends Controller
         $this->ticketStatus = $ticketStatus;
     }
 
+    public function getQueueGroup(Request $request)
+    {
+        $user = Auth::user();
+
+        $ticketGroup = TicketGroup::with(['current_tickets'])
+            ->whereHas('queue_setting', function (Builder $query) use ($user) {
+                $query->whereUserId($user->id);
+            })->get();
+
+        if (!$ticketGroup) {
+            return response(['message' => 'Unauthenticated.'], 401);
+        }
+
+        return $this->sendOkResponse($ticketGroup, 'Ticket Group');
+    }
+
     public function callNextQueue(Request $request, int $ticketGroupId)
     {
         $user = Auth::user();
