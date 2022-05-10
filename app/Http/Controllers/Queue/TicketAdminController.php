@@ -34,7 +34,7 @@ class TicketAdminController extends Controller
     {
         $user = Auth::user();
 
-        $ticketGroups = TicketGroup::with(['tickets'])
+        $ticketGroups = TicketGroup::with(['tickets.line_member'])
             ->whereHas('queue_setting', function (Builder $query) use ($user) {
                 $query->whereUserId($user->id);
             })

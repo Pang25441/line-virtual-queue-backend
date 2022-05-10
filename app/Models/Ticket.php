@@ -68,7 +68,8 @@ class Ticket extends Model
         return $this->belongsTo(TicketGroup::class, 'ticket_group_id');
     }
 
-    function line_member() {
-        return $this->hasOne(LineMember::class, 'line_member_id');
+    function line_member()
+    {
+        return $this->hasOne(LineMember::class, 'id', 'line_member_id');
     }
 }
