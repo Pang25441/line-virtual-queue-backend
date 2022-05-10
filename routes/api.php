@@ -88,6 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::controller(TicketAdminController::class)->prefix('admin/ticket')->group(function () {
         Route::get('groups', 'getQueueGroup');
+        Route::get('status', 'getTicketStatus');
         Route::get('next/{ticketGroupId}', 'callNextQueue');
         Route::get('recall/{ticketId}', 'recallQueue');
         Route::get('execute/{ticketId}', 'executeQueue');

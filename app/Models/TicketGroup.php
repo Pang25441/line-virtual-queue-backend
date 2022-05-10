@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 /**
  * App\Models\TicketGroup
@@ -47,11 +48,11 @@ class TicketGroup extends Model
 
     function tickets()
     {
-        return $this->hasMany(Ticket::class, 'id', 'ticket_group_id');
+        return $this->hasMany(Ticket::class, 'ticket_group_id', 'id');
     }
 
-    function current_tickets()
-    {
-        return $this->hasMany(Ticket::class, 'id', 'ticket_group_id')->where('ticket_group_active_count', $this->active_count);
+    function current_ticket() {
+        return $this->hasMany(Ticket::class, 'ticket_group_active_count', 'active_count');
     }
+
 }

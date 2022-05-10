@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Log;
 
 use LINE\LINEBot;
 
+use function PHPSTORM_META\map;
+
 class TicketAdminController extends Controller
 {
     private $ticketStatus = [];
@@ -32,16 +34,30 @@ class TicketAdminController extends Controller
     {
         $user = Auth::user();
 
-        $ticketGroup = TicketGroup::with(['current_tickets'])
+        $ticketGroups = TicketGroup::with(['tickets'])
             ->whereHas('queue_setting', function (Builder $query) use ($user) {
                 $query->whereUserId($user->id);
-            })->get();
+            })
+            ->get()->toArray();
 
-        if (!$ticketGroup) {
+        $ticketGroups = collect($ticketGroups)->map(function ($ticket_group) {
+            $ticket_group['tickets'] = collect($ticket_group['tickets'])->reject(function ($ticket) use ($ticket_group) {
+                return ($ticket['ticket_group_active_count'] != $ticket_group['active_count']);
+            });
+            return $ticket_group;
+        });
+
+        if (!$ticketGroups) {
             return response(['message' => 'Unauthenticated.'], 401);
         }
 
-        return $this->sendOkResponse($ticketGroup, 'Ticket Group');
+        return $this->sendOkResponse($ticketGroups, 'Ticket Group');
+    }
+
+    public function getTicketStatus()
+    {
+        $ticketStatus = TicketStatus::all();
+        return $this->sendOkResponse($ticketStatus, 'Ticket Status');
     }
 
     public function callNextQueue(Request $request, int $ticketGroupId)
