@@ -90,7 +90,7 @@ class TicketAdminController extends Controller
         }
 
         // Send Queue Notify
-        $messageBuilder = new LINEBot\MessageBuilder\TextMessageBuilder("Your Queue Is Ready");
+        $messageBuilder = new LINEBot\MessageBuilder\TextMessageBuilder($waiting_queue->ticket_number . " Your Queue Is Ready");
         $message = $messageBuilder->buildMessage();
 
         try {
