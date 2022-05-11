@@ -100,7 +100,9 @@ class TicketAdminController extends Controller
             Log::error('callNextQueue: ' . $th->getMessage());
         }
 
-        return $this->sendOkResponse($waiting_queue);
+        $queue = Ticket::with(['line_member'])->find($waiting_queue->id);
+
+        return $this->sendOkResponse($queue);
     }
 
     public function recallQueue(Request $request, int $ticketId)
