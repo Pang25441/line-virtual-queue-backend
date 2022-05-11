@@ -30,9 +30,9 @@ class LineService
 
         if ($accessToken) {
             Log::debug('LineService: accessToken ' . $accessToken);
-            if($this->verifyToken($accessToken)) {
+            if ($this->verifyToken($accessToken)) {
                 $this->accessToken = $accessToken;
-                if($profile = $this->getProfile($accessToken)) {
+                if ($profile = $this->getProfile($accessToken)) {
                     $this->profile = $profile;
                 }
             } else {
@@ -56,10 +56,12 @@ class LineService
         $lineMember = LineMember::whereUserId($lineUserId)->with('line_config')->first();
 
         if ($lineMember) {
+            Log::debug('LineService: getLineConfigByUserId : Found');
             $this->oa_access_token = $lineMember->line_config->channel_access_token;
             $this->lineConfig = $lineMember->line_config;
-            return $lineMember->LineConfig;
+            return $this->lineConfig;
         }
+        Log::debug('LineService: getLineConfigByUserId : Not Found');
 
         return false;
     }
@@ -129,13 +131,13 @@ class LineService
 
     function getProfile(string $accessToken = null)
     {
-        if(!$accessToken && $this->profile) {
+        if (!$accessToken && $this->profile) {
             return $this->profile;
         }
 
         $accessToken = $accessToken ? $accessToken : $this->accessToken;
 
-        if(!$accessToken) {
+        if (!$accessToken) {
             Log::error("getProfile : No Access token");
             return false;
         }
@@ -183,13 +185,13 @@ class LineService
             return false;
         }
 
-        $params = [
+        $payload = [
             'to' => $userId,
-            'messages' => json_encode($messageObject)
+            'messages' => $messageObject
         ];
 
         try {
-            $response = $this->botRequest($endpoint, $params);
+            $response = $this->sendRequest($endpoint, $payload);
             if ($response === false) {
                 Log::error("sendPushMessage : OA Access Token not set");
                 return false;
@@ -200,22 +202,27 @@ class LineService
         }
     }
 
-    private function botRequest(string $endpoint, array $params)
+    private function sendRequest(string $endpoint, array $payload)
     {
         if (!$this->oa_access_token) {
             return false;
         }
 
         try {
-            $httpClient = new \LINE\LINEBot\HTTPClient\CurlHTTPClient($this->oa_access_token);
-            $bot = new \LINE\LINEBot($httpClient, ['channelSecret' => '']);
-            $headers = ['Content-Type: application/json; charset=utf-8'];
-            $response = $bot->httpClient->post($bot->DEFAULT_ENDPOINT_BASE . $endpoint, $params, $headers);
+            $headers = ['Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $this->oa_access_token];
+            $client = new Client(['headers' => $headers]);
+            $response = $client->post('https://api.line.me/' . $endpoint, [
+                'json' => $payload
+            ]);
+            $statusCode = $response->getStatusCode();
 
-            if ($response->isSucceeded()) {
-                return $response;
+            if ($statusCode == 200) {
+                $body = $response->getBody();
+                $stringBody = (string) $body;
+                $content = json_decode($stringBody);
+                return $content;
             } else {
-                throw new Exception($response->getHTTPStatus() . ' ' . $response->getRawBody());
+                throw new Exception($statusCode . ' ' .  $response->getBody());
             }
         } catch (\Throwable $th) {
             throw new Exception($th->getMessage());

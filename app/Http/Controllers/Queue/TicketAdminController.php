@@ -107,7 +107,7 @@ class TicketAdminController extends Controller
     {
         $user = Auth::user();
 
-        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting', 'line_member']);
+        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting', 'line_member'])->first();
 
         if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
             return response(['message' => 'Unauthenticated.'], 401);
@@ -134,7 +134,7 @@ class TicketAdminController extends Controller
     {
         $user = Auth::user();
 
-        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting']);
+        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting', 'line_member'])->first();
 
         if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
             return response(['message' => 'Unauthenticated.'], 401);
@@ -155,13 +155,15 @@ class TicketAdminController extends Controller
     {
         $user = Auth::user();
 
-        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting']);
+        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting', 'line_member'])->first();
 
         if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
             return response(['message' => 'Unauthenticated.'], 401);
         }
 
+        $now = Carbon::now();
         $ticket->is_postpone = 1;
+        $ticket->postpone_time = $now->toDateTimeString();
 
         try {
             $ticket->save();
@@ -176,7 +178,7 @@ class TicketAdminController extends Controller
     {
         $user = Auth::user();
 
-        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting']);
+        $ticket = Ticket::whereId($ticketId)->with(['ticket_group', 'ticket_group.queue_setting', 'line_member'])->first();
 
         if ($ticket->ticket_group->queue_setting->user_id != $user->id) {
             return response(['message' => 'Unauthenticated.'], 401);
