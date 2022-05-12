@@ -119,13 +119,23 @@ class TicketAdminController extends Controller
             return $this->sendBadResponse(null, 'Queue Cannot Recall');
         }
 
+        $now = Carbon::now();
+        $ticket->postpone_time = $now->toDateTimeString();
+
+        try {
+            $ticket->save();
+        } catch (\Throwable $th) {
+            // return $this->sendErrorResponse($th->getMessage(), 'Cannot Update Ticket Status');
+        }
+
         // Send Queue Notify
         $messageBuilder = new LINEBot\MessageBuilder\TextMessageBuilder("Your Queue Is Ready (Recall)");
         $message = $messageBuilder->buildMessage();
         try {
             $lineService = new LineService(['lineUserId' => $ticket->line_member->user_id]);
             $lineService->sendPushMessage($message);
-            return $this->sendOkResponse($ticket, 'Recall Success');
+            $queue = Ticket::with(['line_member'])->find($ticket->id);
+            return $this->sendOkResponse($queue, 'Recall Success');
         } catch (\Throwable $th) {
             Log::error('recallQueue: ' . $th->getMessage());
             return $this->sendErrorResponse(null, 'Recall failed');
@@ -146,7 +156,8 @@ class TicketAdminController extends Controller
 
         try {
             $ticket->save();
-            return $this->sendOkResponse($ticket, 'Queue Executed');
+            $queue = Ticket::with(['line_member'])->find($ticket->id);
+            return $this->sendOkResponse($queue, 'Queue Executed');
         } catch (\Throwable $th) {
             Log::error("executeQueue: " . $th->getMessage());
             return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
@@ -169,7 +180,8 @@ class TicketAdminController extends Controller
 
         try {
             $ticket->save();
-            return $this->sendOkResponse($ticket, 'Queue Postpone');
+            $queue = Ticket::with(['line_member'])->find($ticket->id);
+            return $this->sendOkResponse($queue, 'Queue Postpone');
         } catch (\Throwable $th) {
             Log::error("postponeQueue: " . $th->getMessage());
             return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
@@ -190,7 +202,8 @@ class TicketAdminController extends Controller
 
         try {
             $ticket->save();
-            return $this->sendOkResponse($ticket, 'Queue Rejected');
+            $queue = Ticket::with(['line_member'])->find($ticket->id);
+            return $this->sendOkResponse($queue, 'Queue Rejected');
         } catch (\Throwable $th) {
             Log::error("rejectQueue: " . $th->getMessage());
             return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
