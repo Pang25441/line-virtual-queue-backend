@@ -120,7 +120,8 @@ class TicketAdminController extends Controller
         }
 
         $now = Carbon::now();
-        $ticket->postpone_time = $now->toDateTimeString();
+        $ticket->is_postpone = 0;
+        $ticket->calling_time = $now->toDateTimeString();
 
         try {
             $ticket->save();
