@@ -19,6 +19,6 @@ Route::get('/', function () {
     // return view('welcome');
 });
 
-Route::get('/booking_code/{bookingCode}', [BookingController::class, 'getBookingQRCode']);
+Route::get('/booking_code/{bookingCode}.svg', [BookingController::class, 'getBookingQRCode']);
 
-Route::get('/ticket_group_code/{ticketGroupCode}', [TicketGroupController::class, 'getTicketGroupQRCode']);
+Route::get('/ticket_group_code/{ticketGroupCode}.svg', [TicketGroupController::class, 'getTicketGroupQRCode']);
