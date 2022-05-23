@@ -95,7 +95,7 @@ class LineService
         $line_login_channel_id = null;
 
         if ($res = json_decode($stringBody)) {
-            $line_login_channel_id = $res['client_id'];
+            $line_login_channel_id = $res->client_id;
         }
 
         $lineConfig = LineConfig::whereLoginChannelId($line_login_channel_id)->first();
@@ -109,7 +109,7 @@ class LineService
         return false;
     }
 
-    private function profileRegister(string $userId, array $profile)
+    private function profileRegister(string $userId, object $profile)
     {
         $lineMember = LineMember::whereUserId($userId)->whereHas('line_config', function (Builder $query) {
             $query->whereId($this->lineConfig->id);
@@ -120,8 +120,8 @@ class LineService
                 $lineMember = new LineMember();
                 $lineMember->line_config_id = $this->lineConfig->id;
                 $lineMember->user_id = $userId;
-                $lineMember->display_name = $profile['displayName'];
-                $lineMember->picture = $profile['pictureUrl'];
+                $lineMember->display_name = $profile->displayName;
+                $lineMember->picture = $profile->pictureUrl;
                 $lineMember->save();
             } catch (\Throwable $th) {
                 Log::error('profileRegister: ' . $th->getMessage());
@@ -165,7 +165,7 @@ class LineService
                 // $profile['displayName'];
                 // $profile['pictureUrl'];
                 // $profile['statusMessage'];
-                $this->profileRegister($profile['userId'], $profile);
+                $this->profileRegister($profile->userId, $profile);
                 return $profile;
             }
         } catch (\Throwable $th) {

@@ -27,6 +27,28 @@ class TicketController extends Controller
         $this->ticketStatus = $ticketStatus;
     }
 
+    function getTicketGroupByCode(Request $request){
+        $ticketGroupCode = $request->input('ticket_group_code', null);
+
+        if (!$ticketGroupCode) {
+            return $this->sendBadResponse(['error' => "CODE_EMPTY"], 'Code not found');
+        }
+
+        // $lineService = $request->lineService;
+
+        $ticketGroup = TicketGroup::whereTicketGroupCode($ticketGroupCode)->first();
+
+        if (!$ticketGroup) {
+            return $this->sendBadResponse(['error' => "CODE_REJECT"], 'Ticket Group Not Found');
+        }
+
+        if ($ticketGroup->active != 1) {
+            return $this->sendBadResponse(['error' => "TICKET_INACTIVE"], 'Ticket Group Inactivated');
+        }
+
+        return $this->sendOkResponse($ticketGroup);
+    }
+
     function generateTicket(Request $request)
     {
 

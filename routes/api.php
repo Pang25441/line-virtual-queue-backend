@@ -29,12 +29,13 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::get('logout', 'logout');
 });
 
-// Route::apiResource('line_config', LineConfigController::class);
 
+// LINE Liff Route
 Route::middleware('lineLogin')->prefix('queue')->group(function () {
 
     Route::controller(TicketController::class)->prefix('ticket')->group(function () {
         Route::post('generate', 'generateTicket');
+        Route::post('group_by_code', 'getTicketGroupByCode');
         Route::get('my', 'currentTicket');
     });
 
@@ -49,13 +50,10 @@ Route::middleware('lineLogin')->prefix('queue')->group(function () {
     });
 });
 
-Route::controller(UserController::class)->group(function () {
-    Route::get('test', 'index');
-});
-
 
 // Private Route
 Route::middleware('auth:sanctum')->group(function () {
+    // Route::apiResource('line_config', LineConfigController::class);
 
     Route::get('/profile', [AuthController::class, 'profile']);
 
