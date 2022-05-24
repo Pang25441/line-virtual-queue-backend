@@ -46,6 +46,12 @@ class TicketController extends Controller
             return $this->sendBadResponse(['error' => "TICKET_INACTIVE"], 'Ticket Group Inactivated');
         }
 
+        $waitingCount = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->active_count)->whereStatus($this->ticketStatus['PENDING'])->count();
+        $ticketGroup->waitingCount = $waitingCount;
+
+        $lastNumber = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->active_count)->max("count");
+        $ticketGroup->nextNumber = $lastNumber + 1;
+
         return $this->sendOkResponse($ticketGroup);
     }
 
