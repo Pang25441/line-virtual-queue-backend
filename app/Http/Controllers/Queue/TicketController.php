@@ -46,8 +46,24 @@ class TicketController extends Controller
         }
 
         if ($ticketGroup->active != 1) {
-            return $this->sendBadResponse(['error' => "TICKET_INACTIVE"], 'Ticket Group Inactivated');
+            return $this->sendBadResponse(['error' => "TICKET_GROUP_INACTIVE"], 'Ticket Group Inactivated');
         }
+
+        $lineService = $request->lineService;
+
+        $lineConfig = $lineService->getLineConfig();
+
+        $profile = $lineService->getProfile();
+
+        $lineMember = LineMember::whereUserId($profile->userId)->whereHas('line_config', function (Builder $query) use ($lineConfig) {
+            $query->whereId($lineConfig->id);
+        })->first();
+
+        $status = [$this->ticketStatus['PENDING'], $this->ticketStatus['CALLING']];
+        $existTicket = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->active_count)->whereLineMemberId($lineMember->id)->whereIn('status', $status)->with(["ticket_group" => function ($query) {
+            $query->select("id", "description");
+        }])->first();
+        $ticketGroup->exist_ticket = $existTicket;
 
         $waitingCount = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->active_count)->whereStatus($this->ticketStatus['PENDING'])->count();
         $ticketGroup->waiting_count = $waitingCount;
@@ -76,7 +92,7 @@ class TicketController extends Controller
         }
 
         if ($ticketGroup->active != 1) {
-            return $this->sendBadResponse(['error' => "TICKET_INACTIVE"], 'Ticket Group Inactivated');
+            return $this->sendBadResponse(['error' => "TICKET_GROUP_INACTIVE"], 'Ticket Group Inactivated');
         }
 
         $lineConfig = $lineService->getLineConfig();
@@ -87,11 +103,11 @@ class TicketController extends Controller
             $query->whereId($lineConfig->id);
         })->first();
 
-        $status = [$this->ticketStatus['PENDING'], $this->ticketStatus['PENDING']];
+        $status = [$this->ticketStatus['PENDING'], $this->ticketStatus['CALLING']];
         $existsTicket = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->active_count)->whereLineMemberId($lineMember->id)->whereIn('status', $status)->count();
 
         if ($existsTicket != 0) {
-            return $this->sendBadResponse(['error' => "TICKET_EXISTS"], 'Ticket already exists');
+            return $this->sendBadResponse(['error' => "TICKET_EXIST"], 'Ticket already exists');
         }
 
         $lastTicket = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->active_count)->max('count');
@@ -115,7 +131,13 @@ class TicketController extends Controller
         }])->first();
 
         // Send Ticket
-        $this->sendTicket($ticket->id);
+        try {
+            $ticketIsSent = $this->sendTicket($ticket->id);
+        } catch (\Throwable $th) {
+            $ticketIsSent = false;
+        }
+
+        $result->is_sent = $ticketIsSent;
 
         return $this->sendOkResponse($result, 'Ticket Added');
     }
@@ -149,7 +171,10 @@ class TicketController extends Controller
         } catch (\Throwable $th) {
             //throw $th;
             Log::error('sendTicket: ' . $th->getMessage());
+            return false;
         }
+
+        return true;
     }
 
     private $ticketTemplate = '
@@ -254,7 +279,7 @@ class TicketController extends Controller
         $ticket = Ticket::whereLineMemberId($lineMember->id)->whereIn('status', $status)->orderBy('pending_time', 'desc')->first();
 
         if (!$ticket) {
-            return $this->sendBadResponse(null, 'Ticket not found');
+            return $this->sendBadResponse(['error' => "NO_TICKET"], 'Ticket not found');
         }
 
         $waiting_count = Ticket::whereTicketGroupId($ticket->ticket_group_id)->whereTicketGroupActiveCount($ticket->ticket_group_active_count)->where('pending_time', '<=', $ticket->pending_time)->whereIn('status', $status)->count();

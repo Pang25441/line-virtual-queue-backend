@@ -90,7 +90,7 @@ class TicketAdminController extends Controller
         }
 
         // Send Queue Notify
-        $messageBuilder = new LINEBot\MessageBuilder\TextMessageBuilder($waiting_queue->ticket_number . " Your Queue Is Ready");
+        $messageBuilder = new LINEBot\MessageBuilder\TextMessageBuilder($waiting_queue->ticket_number, "Your Queue Is Ready!", "ถึงคิวของท่านแล้ว");
         $message = $messageBuilder->buildMessage();
 
         try {
@@ -130,7 +130,7 @@ class TicketAdminController extends Controller
         }
 
         // Send Queue Notify
-        $messageBuilder = new LINEBot\MessageBuilder\TextMessageBuilder("Your Queue Is Ready (Recall)");
+        $messageBuilder = new LINEBot\MessageBuilder\TextMessageBuilder($ticket->ticket_number, "Your Queue Is Ready (Recall)", "ถึงคิวของท่านแล้ว (เรียกซ้ำ)");
         $message = $messageBuilder->buildMessage();
         try {
             $lineService = new LineService(['lineUserId' => $ticket->line_member->user_id]);

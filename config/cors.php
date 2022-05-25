@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['https://line-virtual-queue-frontend.vercel.app', 'https://line-virtual-queue-liff.vercel.app','https://d57a-124-120-80-183.ap.ngrok.io'],
 
     'allowed_origins_patterns' => [],
 
