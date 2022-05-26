@@ -146,7 +146,7 @@ class TicketController extends Controller
     {
         $ticket = Ticket::whereId($ticketId)->with(["ticket_group.queue_setting", "line_member"])->first();
         $pending_time_object = Carbon::parse($ticket->pending_time);
-        $waiting_count = Ticket::whereTicketGroupId($ticket->ticket_group_id)->whereTicketGroupActiveCount($ticket->ticket_group_active_count)->count();
+        $waiting_count = Ticket::whereTicketGroupId($ticket->ticket_group_id)->whereTicketGroupActiveCount($ticket->ticket_group_active_count)->whereStatus($this->ticketStatus['PENDING'])->count();
 
         $description = $ticket->ticket_group->description;
         $queue_number = $ticket->ticket_number;

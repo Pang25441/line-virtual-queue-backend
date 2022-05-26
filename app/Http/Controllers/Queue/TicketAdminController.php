@@ -41,9 +41,11 @@ class TicketAdminController extends Controller
             ->get()->toArray();
 
         $ticketGroups = collect($ticketGroups)->map(function ($ticket_group) {
-            $ticket_group['tickets'] = collect($ticket_group['tickets'])->reject(function ($ticket) use ($ticket_group) {
+            $tickets = collect($ticket_group['tickets'])->reject(function ($ticket) use ($ticket_group) {
                 return ($ticket['ticket_group_active_count'] != $ticket_group['active_count']);
             });
+            $ticket_group['tickets'] = array_values($tickets->toArray());
+            // Log::debug($tickets);
             return $ticket_group;
         });
 
