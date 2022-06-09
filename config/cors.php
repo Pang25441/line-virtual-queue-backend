@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => explode(',', env('SANCTUM_STATEFUL_DOMAINS',"*")),
+    'allowed_origins' => explode(',', env('CORS_ALLOW_ORIGINS',"*")),
 
     'allowed_origins_patterns' => [],
 
