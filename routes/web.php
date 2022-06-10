@@ -17,6 +17,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     // return view('welcome');
+    if(env("FRONT_URL")) {
+        return redirect(env("FRONT_URL"));
+    } else {
+        return response("",404);
+    }
 });
 
 Route::get('/booking_code/{bookingCode}.svg', [BookingController::class, 'getBookingQRCode']);
