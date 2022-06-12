@@ -28,6 +28,9 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
     Route::get('logout', 'logout');
 });
+Route::prefix('user')->controller(UserController::class)->group(function () {
+    Route::post('register', 'store');
+});
 
 
 // LINE Liff Route
@@ -56,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::apiResource('line_config', LineConfigController::class);
 
     Route::get('/profile', [AuthController::class, 'profile']);
+    Route::put('/profile', [UserController::class, 'update']);
 
     Route::prefix('admin/setting')->group(function () {
 
