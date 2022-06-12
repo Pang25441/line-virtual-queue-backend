@@ -43,6 +43,7 @@ class UserController extends Controller
         $newUser = new User();
         $newUser->first_name = $request->input("first_name", null);
         $newUser->last_name = $request->input("last_name", null);
+        $newUser->name = $newUser->first_name . " " . $newUser->last_name;
         $newUser->email = $request->input("email", null);
         $newUser->password = Hash::make($request->input("password", null));
 
@@ -88,6 +89,7 @@ class UserController extends Controller
 
         $user->first_name = $request->input("first_name", null);
         $user->last_name = $request->input("last_name", null);
+        $user->name = $user->first_name . " " . $user->last_name;
 
         try {
             $user->save();
