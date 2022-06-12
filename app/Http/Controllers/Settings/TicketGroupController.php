@@ -43,15 +43,13 @@ class TicketGroupController extends Controller
         $user = Auth::user();
 
         try {
-            $ticketGroup = TicketGroup::whereHas('queue_setting', function (Builder $query) use ($user) {
-                $query->whereUserId($user->id);
-            })->orderBy('ticket_group_prefix', 'ASC')->get();
+            $queueSetting = QueueSetting::where('user_id', $user->id)->with("ticket_groups")->first();
         } catch (\Throwable $th) {
             Log::error("TicketGroupController: index: " . $th->getMessage());
             return $this->sendErrorResponse(['error' => 'DB_ERROR'], 'DB Error');
         }
 
-        return $this->sendOkResponse($ticketGroup);
+        return $this->sendOkResponse($queueSetting);
     }
 
     /**

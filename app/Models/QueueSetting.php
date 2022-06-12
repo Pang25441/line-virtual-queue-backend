@@ -27,6 +27,8 @@ namespace App\Models;
  * @mixin \Eloquent
  * @property int $line_config_id
  * @method static \Illuminate\Database\Eloquent\Builder|QueueSetting whereLineConfigId($value)
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TicketGroup[] $ticket_groups
+ * @property-read int|null $ticket_groups_count
  */
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -42,7 +44,7 @@ class QueueSetting extends Model
         return $this->hasMany(CalendarSetting::class, 'queue_setting_id');
     }
 
-    function ticket_group() {
+    function ticket_groups() {
         return $this->hasMany(TicketGroup::class, 'queue_setting_id');
     }
 

@@ -34,6 +34,10 @@ use Illuminate\Support\Facades\Log;
  * @mixin \Eloquent
  * @property string|null $ticket_group_code Random unique key
  * @method static \Illuminate\Database\Eloquent\Builder|TicketGroup whereTicketGroupCode($value)
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Ticket[] $current_ticket
+ * @property-read int|null $current_ticket_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Ticket[] $tickets
+ * @property-read int|null $tickets_count
  */
 class TicketGroup extends Model
 {

@@ -64,6 +64,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $confirm_by
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereConfirmBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereConfirmDate($value)
+ * @property-read LineMember|null $line_member
  */
 class Booking extends Model
 {
