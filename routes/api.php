@@ -7,6 +7,7 @@ use App\Http\Controllers\Queue\TicketAdminController;
 use App\Http\Controllers\Queue\TicketController;
 use App\Http\Controllers\Settings\CalendarSettingController;
 use App\Http\Controllers\Settings\QueueSettingController;
+use App\Http\Controllers\Settings\SettingStatusController;
 use App\Http\Controllers\Settings\TicketGroupController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -86,6 +87,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('ticketGroupActive/{id}', 'ticketGroupActive');
             Route::get('ticketGroupInactive/{id}', 'ticketGroupInactive');
         });
+
+        Route::get("check", [SettingStatusController::class, "checkAllSettingStatus"]);
     });
 
     Route::controller(TicketAdminController::class)->prefix('admin/ticket')->group(function () {

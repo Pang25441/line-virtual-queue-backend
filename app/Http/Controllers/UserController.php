@@ -31,9 +31,9 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => ['required'],
             'last_name' => ['required'],
-            'email' => ['requerd', 'unique:users,email'],
-            'password' => ['required', 'min:4', 'max:100'],
-            'password_confirmation' => ['confirmed'],
+            'email' => ['required', 'unique:users,email'],
+            'password' => ['required', 'min:4', 'max:100','confirmed'],
+            // 'password_confirmation' => ['confirmed'],
         ]);
 
         if ($validator->fails()) {
@@ -117,10 +117,17 @@ class UserController extends Controller
         $password = $request->input("password");
         $password_confirmation = $request->input("password_confirmation");
 
-        // Check password
+        // Check password if not correct
         if(!Hash::check($password_old, $user->password)) {
-
+            return $this->sendBadResponse(null, 'Password not correct');
         }
+
+        $new_password = Hash::make($password);
+
+        $user->password = $new_password;
+        $savedUser = $user->save();
+
+        return $this->sendOkResponse(true, "Password Changed");
     }
 
     /**
