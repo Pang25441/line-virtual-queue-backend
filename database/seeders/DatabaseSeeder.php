@@ -14,8 +14,10 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         \App\Models\User::create([
-            'name' => 'admin',
-            'email' => 'admin@localhost.local',
+            'name' => 'demo',
+            'first_name'=>'demo',
+            'last_name'=>'demo',
+            'email' => 'demo@lvq.imbot.me',
             'email_verified_at' => now(),
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'remember_token' => \Illuminate\Support\Str::random(10),
