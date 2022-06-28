@@ -60,7 +60,7 @@ class TicketController extends Controller
         })->first();
 
         $status = [$this->ticketStatus['PENDING'], $this->ticketStatus['CALLING']];
-        $existTicket = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->active_count)->whereLineMemberId($lineMember->id)->whereIn('status', $status)->with(["ticket_groups" => function ($query) {
+        $existTicket = Ticket::whereTicketGroupId($ticketGroup->id)->whereTicketGroupActiveCount($ticketGroup->active_count)->whereLineMemberId($lineMember->id)->whereIn('status', $status)->with(["ticket_group" => function ($query) {
             $query->select("id", "description");
         }])->first();
         $ticketGroup->exist_ticket = $existTicket;
@@ -126,7 +126,7 @@ class TicketController extends Controller
             return $this->sendBadResponse(['error' => "TICKET_UNSAVE", 'debug' => $th->getMessage()], 'Cannot create ticket');
         }
 
-        $result = Ticket::select("ticket_group_id", "ticket_number")->whereId($ticket->id)->with(["ticket_groups" => function ($query) {
+        $result = Ticket::select("ticket_group_id", "ticket_number")->whereId($ticket->id)->with(["ticket_group" => function ($query) {
             $query->select("id", "description");
         }])->first();
 
